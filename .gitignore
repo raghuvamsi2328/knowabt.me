@@ -1,0 +1,21 @@
+# Node
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+.env
+.DS_Store
+# Logs
+logs
+*.log
+# Build output
+dist/
+.next/
+out/
+# Docker
+**/data/
+**/output/
+# SQLite
+data/*.db
+# VSCode
+.vscode/
