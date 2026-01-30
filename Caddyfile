@@ -1,18 +1,4 @@
 :80, www.server96.com, server96.com {
-    # 1. Capture the subdomain from the Host header
-    @subdomain header_regexp sub Host ^([^.]+)\.server96\.com
-
-    handle @subdomain {
-        root * /var/www/portfolios/{re.sub.1}
-        file_server
-        try_files {path} {path}/ /index.html
-    }
-
-    # 2. Serve frontend for www.server96.com and server96.com
-    handle {
-        root * /srv
-        file_server
-        try_files {path} {path}/ /index.html
-    }
+    reverse_proxy knowabt-frontend:3000
 }
 

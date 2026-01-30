@@ -33,6 +33,10 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
+    depends_on:
+      - frontend
+    networks:
+      - webnet
 
   frontend:
     build: ./frontend
@@ -41,7 +45,11 @@ services:
       - "3001:3000"
     environment:
       - NODE_ENV=production
+    networks:
+      - webnet
 
-volumes:
+networks:
+  webnet:
+    driver: bridge
   caddy_data:
   caddy_config:
