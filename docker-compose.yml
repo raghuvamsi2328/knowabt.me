@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  manager:
+    build: ./manager
+    container_name: knowabt-manager
+    volumes:
+      - ./manager/data:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./portfolios:/var/www/portfolios
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+
+  builder:
+    build: ./builder
+    container_name: portfolio-builder
+    entrypoint: ["/bin/sh", "-c", "echo 'Builder image ready.' && tail -f /dev/null"]
+    volumes:
+      - ./portfolios:/output
+    environment:
+      - NODE_ENV=production
+
+  caddy:
+    image: caddy:alpine
+    container_name: knowabt-caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./portfolios:/srv
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+
+  frontend:
+    build: ./frontend
+    container_name: knowabt-frontend
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=production
+
+volumes:
+  caddy_data:
+  caddy_config:
