@@ -1,4 +1,14 @@
 :80, www.server96.com, server96.com {
-    reverse_proxy knowabt-frontend:3000
+    @subdomain header_regexp sub Host ^([^.]+)\.server96\.com
+
+    handle @subdomain {
+        root * /var/www/portfolios/{re.sub.1}
+        file_server
+        try_files {path} {path}/ /index.html
+    }
+
+    handle {
+        reverse_proxy knowabt-frontend:3000
+    }
 }
 
