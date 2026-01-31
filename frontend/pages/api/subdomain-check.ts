@@ -10,7 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: 'Missing name' });
   }
 
-  const managerUrl = process.env.MANAGER_URL || 'http://knowabt-manager:3000';
+  const managerUrl = process.env.MANAGER_URL || 'http://manager:3000';
 
   try {
     const backendRes = await fetch(`${managerUrl}/sites/check?name=${encodeURIComponent(name)}`);

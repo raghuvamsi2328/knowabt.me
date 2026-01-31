@@ -5,7 +5,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const managerUrl = process.env.MANAGER_URL || 'http://knowabt-manager:3000';
+  const managerUrl = process.env.MANAGER_URL || 'http://manager:3000';
 
   try {
     const backendRes = await fetch(`${managerUrl}/skills`);

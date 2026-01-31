@@ -47,7 +47,7 @@ services:
       - "3001:3000"
     environment:
       - NODE_ENV=production
-      - MANAGER_URL=http://knowabt-manager:3000
+      - MANAGER_URL=http://manager:3000
     networks:
       - webnet
 

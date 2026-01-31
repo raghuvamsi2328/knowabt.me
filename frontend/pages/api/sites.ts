@@ -8,7 +8,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!subdomain || !gitUrl || !contact || !skills) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
-  const managerUrl = process.env.MANAGER_URL || 'http://knowabt-manager:3000';
+  const managerUrl = process.env.MANAGER_URL || 'http://manager:3000';
   try {
     const backendRes = await fetch(`${managerUrl}/sites`, {
       method: 'POST',
