@@ -126,7 +126,7 @@ const queueBuild = ({ name, repoUrl, contact, skills }, res) => {
     if (!slugPattern.test(name)) {
         return res.status(400).json({ error: 'Invalid subdomain. Use letters, numbers, and hyphens only.' });
     }
-    db.get('SELECT 1 FROM sites WHERE name = ? LIMIT 1', [name], (err, row) => {
+    db.get('SELECT 1 FROM sites WHERE name = ? AND status = ? LIMIT 1', [name, 'success'], (err, row) => {
         if (err) return res.status(500).json({ error: err.message });
         if (row) return res.status(409).json({ error: 'Subdomain is already taken.' });
 
@@ -139,13 +139,12 @@ const queueBuild = ({ name, repoUrl, contact, skills }, res) => {
         const builderImage = process.env.BUILDER_IMAGE || 'portfolio-builder';
         const dockerCmd = `docker run --rm -v ${outputVolume}:/output ${builderImage} ${repoUrl}`;
         exec(dockerCmd, (error, stdout, stderr) => {
-            const status = error ? 'failed' : 'success';
-            db.run('UPDATE sites SET status = ? WHERE name = ?', [status, name]);
             if (error) {
-                console.error(`Build Error: ${stderr}`);
+                console.error(`Build Error for ${name}: ${stderr}`);
+                db.run('UPDATE sites SET status = ? WHERE name = ?', ['failed', name]);
                 return;
             }
-            console.log(`Build Success: ${stdout}`);
+            db.run('UPDATE sites SET status = ? WHERE name = ?', ['success', name]);
         });
 
         return res.json({ message: 'Build initiated', folder: name });
@@ -177,7 +176,7 @@ app.get('/sites/check', (req, res) => {
     if (!slugPattern.test(name)) {
         return res.status(400).json({ error: 'Invalid subdomain format' });
     }
-    db.get('SELECT 1 FROM sites WHERE name = ? LIMIT 1', [name], (err, row) => {
+    db.get('SELECT 1 FROM sites WHERE name = ? AND status = ? LIMIT 1', [name, 'success'], (err, row) => {
         if (err) return res.status(500).json({ error: err.message });
         return res.json({ available: !row });
     });
