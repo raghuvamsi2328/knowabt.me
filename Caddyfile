@@ -1,3 +1,7 @@
+{
+    auto_https disable_redirects
+}
+
 :80, www.server96.com, server96.com {
     @subdomain header_regexp sub Host ^([^.]+)\.server96\.com
 
