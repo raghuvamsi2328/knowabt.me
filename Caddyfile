@@ -12,7 +12,7 @@
     }
 
     handle {
-        reverse_proxy frontend:3000
+        reverse_proxy knowabt-frontend:3000
     }
 }
 
