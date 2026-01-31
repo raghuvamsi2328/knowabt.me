@@ -3,6 +3,8 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+ENV NPM_CONFIG_PRODUCTION=false
+
 COPY package.json package-lock.json* ./
 RUN npm install
 
