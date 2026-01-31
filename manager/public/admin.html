@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>knowabt.me Admin</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #d8dad3;
+        margin: 0;
+        padding: 24px;
+        color: #4a4a48;
+      }
+      .card {
+        max-width: 980px;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      }
+      h1 {
+        color: #566246;
+        margin: 0 0 16px;
+      }
+      .row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+      }
+      input[type="password"], input[type="text"] {
+        padding: 10px 12px;
+        border-radius: 8px;
+        border: 1px solid #c7c7c7;
+        flex: 1;
+        min-width: 220px;
+      }
+      button {
+        background: #566246;
+        color: #fff;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+      th, td {
+        text-align: left;
+        padding: 10px 6px;
+        border-bottom: 1px solid #eee;
+      }
+      .muted {
+        color: #6b6b6b;
+      }
+      .error {
+        color: #b00020;
+        margin-bottom: 12px;
+      }
+      .success {
+        color: #1b7f3a;
+        margin-bottom: 12px;
+      }
+      .link {
+        color: #2a64d6;
+        text-decoration: none;
+      }
+      .link:hover {
+        text-decoration: underline;
+      }
+      .checkbox {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Admin Panel</h1>
+      <div class="row">
+        <input id="token" type="password" placeholder="Admin token" />
+        <button id="loadBtn">Load</button>
+      </div>
+      <label class="checkbox">
+        <input id="removeFiles" type="checkbox" checked />
+        Delete files from /var/www/portfolios
+      </label>
+      <div id="message" class="muted"></div>
+      <div class="error" id="error"></div>
+      <table id="table">
+        <thead>
+          <tr>
+            <th>Subdomain</th>
+            <th>Repo URL</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+
+    <script>
+      const tokenInput = document.getElementById('token');
+      const loadBtn = document.getElementById('loadBtn');
+      const errorEl = document.getElementById('error');
+      const messageEl = document.getElementById('message');
+      const rowsEl = document.getElementById('rows');
+      const removeFilesEl = document.getElementById('removeFiles');
+
+      const setError = (msg) => {
+        errorEl.textContent = msg || '';
+      };
+
+      const setMessage = (msg) => {
+        messageEl.textContent = msg || '';
+      };
+
+      const fetchSites = async () => {
+        setError('');
+        setMessage('Loading...');
+        rowsEl.innerHTML = '';
+        const token = tokenInput.value.trim();
+        if (!token) {
+          setMessage('');
+          setError('Token is required');
+          return;
+        }
+
+        const res = await fetch('/admin/sites', {
+          headers: {
+            'x-admin-token': token,
+          },
+        });
+
+        const data = await res.json().catch(() => ({ sites: [] }));
+        if (!res.ok) {
+          setMessage('');
+          setError(data.error || 'Failed to load sites');
+          return;
+        }
+
+        const sites = Array.isArray(data.sites) ? data.sites : [];
+        if (sites.length === 0) {
+          setMessage('No records.');
+          return;
+        }
+        setMessage('');
+
+        rowsEl.innerHTML = sites
+          .map(
+            (site) => `
+            <tr>
+              <td><strong>${site.name}</strong></td>
+              <td><a class="link" href="${site.url}" target="_blank" rel="noreferrer">${site.url}</a></td>
+              <td>${site.status}</td>
+              <td>${site.created_at}</td>
+              <td><button data-name="${site.name}">Delete</button></td>
+            </tr>
+          `
+          )
+          .join('');
+
+        rowsEl.querySelectorAll('button[data-name]').forEach((btn) => {
+          btn.addEventListener('click', async () => {
+            const name = btn.getAttribute('data-name');
+            await deleteSite(name);
+          });
+        });
+      };
+
+      const deleteSite = async (name) => {
+        setError('');
+        setMessage('Deleting...');
+        const token = tokenInput.value.trim();
+        const removeFiles = removeFilesEl.checked ? 'true' : 'false';
+
+        const res = await fetch(`/admin/sites/${encodeURIComponent(name)}?removeFiles=${removeFiles}`, {
+          method: 'DELETE',
+          headers: { 'x-admin-token': token },
+        });
+
+        const data = await res.json().catch(() => ({ success: false }));
+        if (!res.ok) {
+          setMessage('');
+          setError(data.error || 'Delete failed');
+          return;
+        }
+
+        setMessage('Deleted.');
+        await fetchSites();
+      };
+
+      loadBtn.addEventListener('click', fetchSites);
+    </script>
+  </body>
+</html>

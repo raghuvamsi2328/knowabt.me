@@ -12,11 +12,14 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+      - BUILDER_IMAGE=portfolio-builder
+      - ADMIN_TOKEN=${ADMIN_TOKEN}
     networks:
       - webnet
 
   builder:
     build: ./builder
+    image: portfolio-builder
     container_name: portfolio-builder
     entrypoint: ["/bin/sh", "-c", "echo 'Builder image ready.' && tail -f /dev/null"]
     volumes:

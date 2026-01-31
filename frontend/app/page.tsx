@@ -6,9 +6,9 @@ import {
   SERVICES,
   HOW_IT_WORKS,
   FORM,
-  TOP_REPOS,
   FOOTER,
 } from "./config";
+import TopReposSection from "./components/TopReposSection";
 
 export default function Home() {
   return (
@@ -204,62 +204,7 @@ export default function Home() {
         </a>
       </section>
 
-      {/* Top 10 Repos Section */}
-      <section
-        id="toprepos"
-        style={{ background: COLORS.secondary }}
-        className="py-16 px-4"
-      >
-        <div className="max-w-5xl mx-auto">
-          <h2
-            className="text-3xl font-bold mb-8 text-center"
-            style={{ color: '#D8DAD3' }}
-          >
-            Top 10 Repos
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {TOP_REPOS.map((repo) => (
-              <div
-                key={repo.url}
-                className="rounded-lg p-6 shadow hover:shadow-lg transition flex flex-col md:flex-row gap-4 items-center"
-                style={{ background: COLORS.card }}
-              >
-                <div className="flex-1">
-                  <a
-                    href={repo.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xl font-semibold hover:underline"
-                    style={{ color: COLORS.secondary }}
-                  >
-                    {repo.name}
-                  </a>
-                  <div
-                    className="text-sm mt-1"
-                    style={{ color: COLORS.accent }}
-                  >
-                    {repo.location}
-                  </div>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {repo.skills.map((skill) => (
-                      <span
-                        key={skill}
-                        className="px-2 py-1 rounded text-xs font-medium"
-                        style={{
-                          background: COLORS.highlight,
-                          color: COLORS.accent,
-                        }}
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <TopReposSection />
 
       {/* Footer */}
       <footer

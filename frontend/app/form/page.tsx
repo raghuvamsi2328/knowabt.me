@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function FormPage() {
   const [form, setForm] = useState({
@@ -11,6 +11,52 @@ export default function FormPage() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [subdomainStatus, setSubdomainStatus] = useState<
+    "idle" | "checking" | "available" | "taken" | "invalid" | "error"
+  >("idle");
+  const [suggestedSkills, setSuggestedSkills] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchTopSkills = async () => {
+      try {
+        const res = await fetch("/api/skills/top");
+        const data = await res.json();
+        const topSkills = Array.isArray(data.skills) ? data.skills : [];
+        setSuggestedSkills(topSkills);
+        if (!form.skills && topSkills.length > 0) {
+          setForm((prev) => ({ ...prev, skills: topSkills.join(", ") }));
+        }
+      } catch (err) {
+        setSuggestedSkills([]);
+      }
+    };
+    fetchTopSkills();
+  }, [form.skills]);
+
+  useEffect(() => {
+    const value = form.subdomain.trim();
+    if (!value) {
+      setSubdomainStatus("idle");
+      return;
+    }
+    if (!/^[a-z0-9-]+$/i.test(value)) {
+      setSubdomainStatus("invalid");
+      return;
+    }
+
+    setSubdomainStatus("checking");
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/subdomain-check?name=${encodeURIComponent(value)}`);
+        const data = await res.json();
+        setSubdomainStatus(data.available ? "available" : "taken");
+      } catch (err) {
+        setSubdomainStatus("error");
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [form.subdomain]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -23,6 +69,15 @@ export default function FormPage() {
     // Basic validation
     if (!form.subdomain || !form.gitUrl || !form.contact || !form.skills) {
       setError("All fields are required.");
+      setLoading(false);
+      return;
+    }
+    if (subdomainStatus === "taken" || subdomainStatus === "invalid") {
+      setError(
+        subdomainStatus === "taken"
+          ? "Subdomain is already taken."
+          : "Subdomain format is invalid."
+      );
       setLoading(false);
       return;
     }
@@ -80,6 +135,18 @@ export default function FormPage() {
             />
             <span className="bg-gray-100 border border-l-0 rounded-r px-3 py-2" style={{ color: '#4A4A48' }}>.knowabt.me</span>
           </div>
+          {subdomainStatus === "checking" && (
+            <div className="mt-1 text-sm" style={{ color: '#4A4A48' }}>Checking availability...</div>
+          )}
+          {subdomainStatus === "available" && (
+            <div className="mt-1 text-sm text-green-700">Subdomain is available.</div>
+          )}
+          {subdomainStatus === "taken" && (
+            <div className="mt-1 text-sm text-red-600">Subdomain is taken.</div>
+          )}
+          {subdomainStatus === "invalid" && (
+            <div className="mt-1 text-sm text-red-600">Use letters, numbers, and hyphens only.</div>
+          )}
         </label>
         <label className="block mb-4">
           <span className="block mb-1 font-medium" style={{ color: '#4A4A48' }}>Git Repo URL (public)</span>
@@ -119,6 +186,11 @@ export default function FormPage() {
             required
             style={{ color: '#4A4A48' }}
           />
+          {suggestedSkills.length > 0 && (
+            <div className="mt-2 text-xs" style={{ color: '#4A4A48' }}>
+              Suggested: {suggestedSkills.join(", ")}
+            </div>
+          )}
         </label>
         <button
           type="submit"
