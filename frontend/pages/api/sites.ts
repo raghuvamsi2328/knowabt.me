@@ -8,15 +8,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!subdomain || !gitUrl || !contact || !skills) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
-  // Forward to backend manager API (update URL as needed)
+  const managerUrl = process.env.MANAGER_URL || 'http://knowabt-manager:3000';
   try {
-    const backendRes = await fetch('http://manager:3000/deploy', {
+    const backendRes = await fetch(`${managerUrl}/sites`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: subdomain, repoUrl: gitUrl }),
+      body: JSON.stringify({ subdomain, gitUrl, contact, skills }),
     });
     if (!backendRes.ok) {
-      return res.status(500).json({ error: 'Failed to deploy site' });
+      const payload = await backendRes.json().catch(() => ({ error: 'Failed to deploy site' }));
+      return res.status(backendRes.status).json(payload);
     }
     return res.status(200).json({ success: true });
   } catch (err) {
