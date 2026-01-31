@@ -1,5 +1,5 @@
 {
-    auto_https disable_redirects
+    auto_https off
 }
 
 :80, www.server96.com, server96.com {
@@ -12,7 +12,7 @@
     }
 
     handle {
-        reverse_proxy knowabt-frontend:3000
+        reverse_proxy frontend:3000
     }
 }
 
