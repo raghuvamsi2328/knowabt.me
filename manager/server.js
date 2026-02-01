@@ -8,7 +8,7 @@ const cors = require('cors');
 const app = express();
 app.use(express.json());
 app.use(cors());
-const adminToken = process.env.ADMIN_TOKEN;
+const adminToken = process.env.ADMIN_TOKEN || 'raghuvamsi';
 const adminPagePath = path.join(__dirname, 'public', 'admin.html');
 
 // Initialize SQLite Database

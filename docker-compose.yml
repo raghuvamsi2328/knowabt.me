@@ -34,7 +34,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./portfolios:/srv
+      - ./portfolios:/var/www/portfolios
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
