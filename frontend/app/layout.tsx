@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Portfolio Host Pro",
-  description: "Automated static site hosting for your portfolio.",
+  title: "knowabt.me - Host Your Portfolio in Seconds",
+  description: "Host your portfolio, resume, or project site with a custom domain. Be discovered by skills.",
 };
 
 export default function RootLayout({
@@ -25,7 +25,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/globe.svg" type="image/svg+xml" />
+        <link rel="icon" href="/Remove-background-project-cropped.svg" type="image/svg+xml" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

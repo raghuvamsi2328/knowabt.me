@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   manager:
     build: ./manager
@@ -7,7 +5,7 @@ services:
     volumes:
       - ./manager/data:/app/data
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./portfolios:/var/www/portfolios
+      - /var/www/portfolios:/var/www/portfolios
     ports:
       - "3000:3000"
     environment:
@@ -23,7 +21,7 @@ services:
     container_name: portfolio-builder
     entrypoint: ["/bin/sh", "-c", "echo 'Builder image ready.' && tail -f /dev/null"]
     volumes:
-      - ./portfolios:/output
+      - /var/www/portfolios:/output
     environment:
       - NODE_ENV=production
 
@@ -34,7 +32,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./portfolios:/var/www/portfolios
+      - /var/www/portfolios:/var/www/portfolios
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
