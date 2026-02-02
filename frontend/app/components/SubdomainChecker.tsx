@@ -78,10 +78,10 @@ export default function SubdomainChecker() {
           <button
             onClick={handleCheck}
             disabled={checking || !subdomain.trim()}
-            className="w-full py-4 rounded-full font-semibold text-lg shadow-lg hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-4 rounded-full font-semibold text-lg shadow-lg hover:opacity-90 transition disabled:cursor-not-allowed"
             style={{ 
-              background: COLORS.secondary,
-              color: COLORS.white
+              background: '#3d4d32',
+              color: 'rgb(216 218 211)'
             }}
           >
             {checking ? 'Checking...' : 'Check Availability'}
@@ -102,8 +102,8 @@ export default function SubdomainChecker() {
                   href="/form"
                   className="block mt-3 px-6 py-2 rounded-full font-semibold hover:opacity-90 transition"
                   style={{ 
-                    background: COLORS.secondary,
-                    color: COLORS.white
+                    background: '#3d4d32',
+                    color: 'rgb(216 218 211)'
                   }}
                 >
                   Claim Now →

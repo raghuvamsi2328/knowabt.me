@@ -11,19 +11,19 @@ export const COLORS = {
   textLight: "#fff",
 };
 
-export const NAV_LINKS = [
-  { label: "How it works", href: "#how" },
-  { label: "Top Repos", href: "#toprepos" },
-  { label: "Get Started", href: "/form" },
-];
+// export const NAV_LINKS = [
+//   { label: "How it works", href: "#how" },
+//   { label: "Top Repos", href: "#toprepos" },
+//   { label: "Get Started", href: "/form" },
+// ];
 
 export const HERO = {
-  title: "Host your web page in seconds.",
-  subtitle: "Showcase your work, skills, and more.",
+  title: "Your Portfolio, Hosted in Seconds.",
+  subtitle: "One Git link. One custom URL. Infinite opportunities.",
   description:
-    "Connect your public git repo, fill in your info, and get a live site instantly. Powered by Caddy for blazing fast static hosting.",
-  ctaPrimary: { label: "Get Started", href: "#form" },
-  ctaSecondary: { label: "View Top Repos", href: "#toprepos" },
+    "Stop wrestling with hosting providers. Connect your repository and get a professional portfolio at a subdomain you actually like. No credit card. No complex setup. Just your code.",
+  ctaPrimary: { label: "Build My Portfolio Free", href: "/form" },
+  ctaSecondary: { label: "View Top Portfolios", href: "#toprepos" },
   image: "/search.svg",
 };
 
@@ -31,17 +31,17 @@ export const HOW_IT_WORKS = [
   {
     icon: "/git-svgrepo-com.svg",
     title: "1. Link Your Repo",
-    description: "Connect your GitHub or Git link.",
+    description: "Paste your GitHub or Git repository link.",
   },
   {
-    icon: "/claim-icon.svg",
+    icon: "/claim-icon-use.svg",
     title: "2. Claim Your Name",
     description: "Pick your unique subdomain (e.g., alex.knowabt.me).",
   },
   {
-    icon: "/rocket-icon.svg",
+    icon: "/rocket-svgrepo-com.svg",
     title: "3. Go Live",
-    description: "Instant deployment of your portfolio.",
+    description: "We instantly deploy your site and showcase your portfolio.",
   },
 ];
 

@@ -5,37 +5,33 @@ import { COLORS } from "../config";
 
 type Portfolio = {
   name: string;
-  description: string;
   tech: string;
   subdomain: string;
   repoUrl: string;
 };
 
 // Mock data as default
+// Mock data as default
 const MOCK_PORTFOLIOS: Portfolio[] = [
   {
     name: "Project-X",
-    description: "Create ux portfolio foctanes and winning project.",
     tech: "React",
     subdomain: "project-x",
     repoUrl: "https://github.com/example/project-x",
   },
   {
     name: "Project-Y",
-    description: "Project a useful leaning designed for API first.",
     tech: "HTML",
     subdomain: "project-y",
     repoUrl: "https://github.com/example/project-y",
   },
   {
     name: "Project-Latisanu",
-    description: "Deploy evername, with a git-comformed productio.",
     tech: "JavaScript",
     subdomain: "project-latisanu",
     repoUrl: "https://github.com/example/project-latisanu",
   },
 ];
-
 export default function TopReposSection() {
   // Initialize with mock data so it shows immediately
   const [portfolios, setPortfolios] = useState<Portfolio[]>(MOCK_PORTFOLIOS);
@@ -89,17 +85,11 @@ export default function TopReposSection() {
                   }}
                 >
                   <h3
-                    className="font-bold text-xl mb-2"
+                    className="font-bold text-xl mb-4"
                     style={{ color: COLORS.textDark }}
                   >
                     {portfolio.name}
                   </h3>
-                  <p
-                    className="text-sm mb-4"
-                    style={{ color: COLORS.accent }}
-                  >
-                    {portfolio.description}
-                  </p>
                   <div className="flex items-center justify-between">
                     <span
                       className="px-3 py-1 rounded-full text-sm font-medium"

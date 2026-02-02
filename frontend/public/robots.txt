@@ -1,0 +1,20 @@
+# robots.txt for knowabt.me
+# Allow all search engines to crawl the entire site
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://knowabt.me/sitemap.xml
+
+# Crawl-delay (optional, helps prevent server overload)
+Crawl-delay: 1
+
+# Disallow crawling of API routes (optional)
+Disallow: /api/
+
+# Allow search pages
+Allow: /search
+
+# Allow form pages
+Allow: /form

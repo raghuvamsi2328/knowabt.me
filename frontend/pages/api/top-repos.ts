@@ -19,7 +19,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Transform backend data to frontend portfolio format
     const portfolios = (data.repos || []).map((repo: any) => ({
       name: repo.name,
-      description: repo.url || `Portfolio hosted at ${repo.name}.knowabt.me`,
       tech: Array.isArray(repo.skills) ? repo.skills.join(', ') : (repo.skills || 'N/A'),
       subdomain: repo.name,
       repoUrl: repo.url,

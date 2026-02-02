@@ -1,15 +1,37 @@
+"use client";
+
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   COLORS,
-  NAV_LINKS,
+  // NAV_LINKS,
   HERO,
   HOW_IT_WORKS,
   FOOTER,
 } from "./config";
 import TopReposSection from "./components/TopReposSection";
 import SubdomainChecker from "./components/SubdomainChecker";
+import { useAuth } from "./hooks/useAuth";
 
 export default function Home() {
+  const [textIndex, setTextIndex] = useState(0);
+  const { user, loading, logout } = useAuth();
+  const router = useRouter();
+  const searchTexts = [
+    "Find Talent",
+    "Discover Portfolios",
+    "Search Skills",
+    "Connect with Creators",
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTextIndex((prev) => (prev + 1) % searchTexts.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div
       style={{ background: COLORS.primary }}
@@ -33,7 +55,7 @@ export default function Home() {
             <span className="font-bold">.me</span>
           </span>
         </div>
-        <ul className="hidden md:flex gap-8 font-medium">
+        {/* <ul className="hidden md:flex gap-8 font-medium">
           {NAV_LINKS.map((link) => (
             <li key={link.href}>
               <a
@@ -45,14 +67,67 @@ export default function Home() {
               </a>
             </li>
           ))}
-        </ul>
-        <a
-          href="/form"
-          className="px-5 py-2 rounded-full font-semibold shadow hover:opacity-90 transition"
-          style={{ background: COLORS.white, color: COLORS.primary }}
-        >
-          Host Now
-        </a>
+        </ul> */}
+        <div className="flex gap-3 items-center">
+          <a
+            href="/search"
+            className="px-5 py-2 rounded-full font-semibold shadow hover:opacity-90 transition flex items-center gap-2 relative overflow-hidden"
+            style={{ background: COLORS.secondary, color: COLORS.white, minWidth: "180px" }}
+          >
+            <Image
+              src="/find-path-svgrepo-com.svg"
+              alt="Search"
+              width={20}
+              height={20}
+              className="shrink-0"
+            />
+            <span
+              key={textIndex}
+              className="inline-block animate-fade-in"
+              style={{
+                animation: "fadeIn 0.5s ease-in-out",
+              }}
+            >
+              {searchTexts[textIndex]}
+            </span>
+          </a>
+          <a
+            href="/form"
+            className="px-5 py-2 rounded-full font-semibold shadow hover:opacity-90 transition"
+            style={{ background: COLORS.white, color: COLORS.secondary }}
+          >
+            Host Portfolio
+          </a>
+          
+          {!loading && (
+            user ? (
+              <div className="flex items-center gap-3">
+                <Image
+                  src={user.avatar_url || '/Remove-background-project-cropped.svg'}
+                  alt={user.username}
+                  width={36}
+                  height={36}
+                  className="rounded-full"
+                />
+                <button
+                  onClick={logout}
+                  className="px-4 py-2 rounded-full font-medium hover:opacity-80 transition text-sm"
+                  style={{ background: COLORS.accent, color: COLORS.white }}
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => router.push('/login')}
+                className="px-5 py-2 rounded-full font-semibold shadow hover:opacity-90 transition"
+                style={{ background: COLORS.accent, color: COLORS.white }}
+              >
+                Login
+              </button>
+            )
+          )}
+        </div>
       </nav>
 
       {/* Hero Section */}
@@ -103,14 +178,13 @@ export default function Home() {
             className="mb-10"
             style={{ color: '#D8DAD3' }}
           >
-            Host your portfolio, resume, or project site with a custom domain. Just
-            link your public git repo and let us handle the rest.
+            We've trimmed the fat. Going from "local project" to "live portfolio" is now a three-step sprint. Just link your git repo and let us handle the rest.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {HOW_IT_WORKS.map((step) => (
               <div
                 key={step.title}
-                className="rounded-lg p-6 shadow hover:shadow-lg transition"
+                className="rounded-lg p-6 shadow hover:shadow-lg transition text-center"
                 style={{ background: COLORS.card }}
               >
                 <Image
@@ -118,7 +192,7 @@ export default function Home() {
                   alt={step.title}
                   width={40}
                   height={40}
-                  className="mb-4"
+                  className="mb-4 mx-auto"
                 />
                 <h3
                   className="font-semibold text-lg mb-2"
@@ -139,7 +213,7 @@ export default function Home() {
               style={{ background: 'white', color: '#566246' }}
             >
               <span>→</span>
-              <span>Get Started</span>
+              <span>Claim Your Subdomain Now</span>
             </a>
           </div>
         </div>

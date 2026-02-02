@@ -15,6 +15,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "knowabt.me - Host Your Portfolio in Seconds",
   description: "Host your portfolio, resume, or project site with a custom domain. Be discovered by skills.",
+  verification: {
+    other: {
+      "msvalidate.01": "29112AEDDA8692D48E049749D1F38D0F",
+    },
+  },
 };
 
 export default function RootLayout({
