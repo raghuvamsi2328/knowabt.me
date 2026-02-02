@@ -14,40 +14,40 @@
 
     # Handle API routes - proxy to backend manager
     handle /auth/* {
-        reverse_proxy knowabt-manager:3000
+        reverse_proxy manager:3000
     }
 
     handle /api/* {
-        reverse_proxy knowabt-manager:3000
+        reverse_proxy manager:3000
     }
 
     handle /admin* {
-        reverse_proxy knowabt-manager:3000
+        reverse_proxy manager:3000
     }
 
     handle /health {
-        reverse_proxy knowabt-manager:3000
+        reverse_proxy manager:3000
     }
 
     handle /deploy* {
-        reverse_proxy knowabt-manager:3000
+        reverse_proxy manager:3000
     }
 
     handle /sites* {
-        reverse_proxy knowabt-manager:3000
+        reverse_proxy manager:3000
     }
 
     handle /skills* {
-        reverse_proxy knowabt-manager:3000
+        reverse_proxy manager:3000
     }
 
     handle /top-repos {
-        reverse_proxy knowabt-manager:3000
+        reverse_proxy manager:3000
     }
 
     # Default - route to frontend
     handle {
-        reverse_proxy knowabt-frontend:3000
+        reverse_proxy frontend:3000
     }
 }
 
