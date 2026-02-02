@@ -12,12 +12,8 @@
         try_files {path} {path}/ /index.html
     }
 
-    # Handle API routes - proxy to backend manager
+    # Handle backend API routes - proxy to manager
     handle /auth/* {
-        reverse_proxy manager:3000
-    }
-
-    handle /api/* {
         reverse_proxy manager:3000
     }
 
@@ -33,6 +29,10 @@
         reverse_proxy manager:3000
     }
 
+    handle /deployments* {
+        reverse_proxy manager:3000
+    }
+
     handle /sites* {
         reverse_proxy manager:3000
     }
@@ -45,7 +45,7 @@
         reverse_proxy manager:3000
     }
 
-    # Default - route to frontend
+    # Default - route everything else (including /api/* for Next.js) to frontend
     handle {
         reverse_proxy frontend:3000
     }

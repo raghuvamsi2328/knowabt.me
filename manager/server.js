@@ -6,6 +6,9 @@ const corsMiddleware = require('./middleware/cors');
 // Initialize Express app
 const app = express();
 
+// Trust proxy (important for Nginx Proxy Manager)
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(express.json());
 app.use(corsMiddleware);
@@ -16,10 +19,12 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: process.env.NODE_ENV === 'production',
+        secure: false, // Set to false when behind Nginx proxy handling SSL
         httpOnly: true,
-        maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
-    }
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        sameSite: 'lax'
+    },
+    proxy: true // Important for proxied environments
 }));
 
 // Passport middleware
