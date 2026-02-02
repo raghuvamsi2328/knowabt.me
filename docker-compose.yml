@@ -11,12 +11,6 @@ services:
     environment:
       - NODE_ENV=production
       - BUILDER_IMAGE=portfolio-builder
-      - ADMIN_TOKEN=${ADMIN_TOKEN}
-      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
-      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
-      - GITHUB_CALLBACK_URL=${GITHUB_CALLBACK_URL}
-      - SESSION_SECRET=${SESSION_SECRET}
-      - FRONTEND_URL=${FRONTEND_URL}
     env_file:
       - ./manager/.env
     networks:
