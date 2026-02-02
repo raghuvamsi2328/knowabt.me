@@ -5,14 +5,50 @@
 :80, www.server96.com, server96.com, www.knowabt.me, knowabt.me {
     @subdomain header_regexp sub Host ^([^.]+)\.(server96\.com|knowabt\.me)$
 
+    # Handle portfolio subdomains
     handle @subdomain {
         root * /var/www/portfolios/{re.sub.1}
         file_server
         try_files {path} {path}/ /index.html
     }
 
+    # Handle API routes - proxy to backend manager
+    handle /auth/* {
+        reverse_proxy knowabt-manager:3000
+    }
+
+    handle /api/* {
+        reverse_proxy knowabt-manager:3000
+    }
+
+    handle /admin* {
+        reverse_proxy knowabt-manager:3000
+    }
+
+    handle /health {
+        reverse_proxy knowabt-manager:3000
+    }
+
+    handle /deploy* {
+        reverse_proxy knowabt-manager:3000
+    }
+
+    handle /sites* {
+        reverse_proxy knowabt-manager:3000
+    }
+
+    handle /skills* {
+        reverse_proxy knowabt-manager:3000
+    }
+
+    handle /top-repos {
+        reverse_proxy knowabt-manager:3000
+    }
+
+    # Default - route to frontend
     handle {
         reverse_proxy knowabt-frontend:3000
     }
 }
+
 
