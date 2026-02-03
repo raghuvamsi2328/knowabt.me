@@ -16,6 +16,7 @@ import { useAuth } from "./hooks/useAuth";
 
 export default function Home() {
   const [textIndex, setTextIndex] = useState(0);
+  const [repoTextIndex, setRepoTextIndex] = useState(0);
   const { user, loading, logout } = useAuth();
   const router = useRouter();
   const searchTexts = [
@@ -24,10 +25,23 @@ export default function Home() {
     "Search Skills",
     "Connect with Creators",
   ];
+  const repoTexts = [
+    "Trending Repos",
+    "Popular Portfolios",
+    "Featured Projects",
+    "Top Developers",
+  ];
 
   useEffect(() => {
     const interval = setInterval(() => {
       setTextIndex((prev) => (prev + 1) % searchTexts.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRepoTextIndex((prev) => (prev + 1) % repoTexts.length);
     }, 2500);
     return () => clearInterval(interval);
   }, []);
@@ -69,10 +83,11 @@ export default function Home() {
           ))}
         </ul> */}
         <div className="flex gap-3 items-center">
+          {/* Search Button - Icon only on mobile, text on desktop */}
           <a
             href="/search"
-            className="px-5 py-2 rounded-full font-semibold shadow hover:opacity-90 transition flex items-center gap-2 relative overflow-hidden"
-            style={{ background: COLORS.secondary, color: COLORS.white, minWidth: "180px" }}
+            className="px-3 md:px-5 py-2 rounded-full font-semibold shadow hover:opacity-90 transition flex items-center gap-2 relative overflow-hidden"
+            style={{ background: COLORS.secondary, color: COLORS.white }}
           >
             <Image
               src="/find-path-svgrepo-com.svg"
@@ -83,28 +98,35 @@ export default function Home() {
             />
             <span
               key={textIndex}
-              className="inline-block animate-fade-in"
+              className="hidden md:inline-block animate-fade-in"
               style={{
                 animation: "fadeIn 0.5s ease-in-out",
+                minWidth: "140px"
               }}
             >
               {searchTexts[textIndex]}
             </span>
           </a>
+          
+          {/* Host Portfolio Button - Icon only on mobile, text on desktop */}
           <a
             href="/form"
-            className="px-5 py-2 rounded-full font-semibold shadow hover:opacity-90 transition"
+            className="px-3 md:px-5 py-2 rounded-full font-semibold shadow hover:opacity-90 transition flex items-center gap-2"
             style={{ background: COLORS.white, color: COLORS.secondary }}
+            title="Host Portfolio"
           >
-            Host Portfolio
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            <span className="hidden md:inline">Host Portfolio</span>
           </a>
           
           {!loading && (
             user ? (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 md:gap-3">
                 <button
                   onClick={() => router.push('/profile')}
-                  className="flex items-center gap-2 px-4 py-2 rounded-full font-medium hover:bg-white/10 transition"
+                  className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-full font-medium hover:bg-white/10 transition"
                 >
                   <Image
                     src={user.avatar_url || '/Remove-background-project-cropped.svg'}
@@ -113,25 +135,40 @@ export default function Home() {
                     height={36}
                     className="rounded-full"
                   />
-                  <span style={{ color: COLORS.textDark }} className="font-semibold">
+                  <span style={{ color: COLORS.textDark }} className="font-semibold hidden md:inline">
                     {user.username}
                   </span>
                 </button>
                 <button
                   onClick={logout}
-                  className="px-4 py-2 rounded-full font-medium hover:opacity-80 transition text-sm"
+                  className="px-3 md:px-4 py-2 rounded-full font-medium hover:opacity-80 transition text-sm"
                   style={{ background: COLORS.accent, color: COLORS.white }}
+                  title="Logout"
                 >
-                  Logout
+                  <span className="hidden md:inline">Logout</span>
+                  <span className="md:hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                      <polyline points="16 17 21 12 16 7"/>
+                      <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                  </span>
                 </button>
               </div>
             ) : (
               <button
                 onClick={() => router.push('/login')}
-                className="px-5 py-2 rounded-full font-semibold shadow hover:opacity-90 transition"
+                className="px-3 md:px-5 py-2 rounded-full font-semibold shadow hover:opacity-90 transition"
                 style={{ background: COLORS.accent, color: COLORS.white }}
               >
-                Login
+                <span className="hidden md:inline">Login</span>
+                <span className="md:hidden">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                    <polyline points="10 17 15 12 10 7"/>
+                    <line x1="15" y1="12" x2="3" y2="12"/>
+                  </svg>
+                </span>
               </button>
             )
           )}
@@ -149,20 +186,24 @@ export default function Home() {
           <p className="mb-8 max-w-xl" style={{ color: COLORS.accent }}>
             {HERO.description}
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+          <div className="flex justify-center md:justify-start">
             <a
-              href="/form"
-              className="px-6 py-3 rounded-full font-semibold shadow hover:opacity-90 transition"
-              style={{ background: COLORS.white, color: COLORS.primary }}
+              href="/search"
+              className="inline-flex items-center gap-3 px-10 py-4 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl hover:opacity-90 transition relative overflow-hidden"
+              style={{ background: COLORS.secondary, color: COLORS.white, minWidth: "280px" }}
             >
-              {HERO.ctaPrimary.label}
-            </a>
-            <a
-              href={HERO.ctaSecondary.href}
-              className="border px-6 py-3 rounded-full font-semibold hover:opacity-90 transition"
-              style={{ borderColor: COLORS.white, color: COLORS.white }}
-            >
-              {HERO.ctaSecondary.label}
+              <span>🔥</span>
+              <span>
+                Discover <span
+                  key={repoTextIndex}
+                  className="inline-block animate-fade-in"
+                  style={{
+                    animation: "fadeIn 0.5s ease-in-out",
+                  }}
+                >
+                  {repoTexts[repoTextIndex]}
+                </span>
+              </span>
             </a>
           </div>
         </div>

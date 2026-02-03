@@ -44,7 +44,8 @@ function SearchContent() {
   const [locations, setLocations] = useState<string[]>([]);
   const [companies, setCompanies] = useState<string[]>([]);
   
-  const MANAGER_URL = process.env.NEXT_PUBLIC_MANAGER_URL || 'http://localhost:3000';
+  // Use Next.js API routes instead of direct manager calls
+  const API_BASE = '/api/search';
 
   // Load filter options
   useEffect(() => {
@@ -59,7 +60,7 @@ function SearchContent() {
 
   const fetchLocations = async () => {
     try {
-      const res = await fetch(`${MANAGER_URL}/search/locations`);
+      const res = await fetch(`${API_BASE}/locations`);
       const data = await res.json();
       setLocations(data.locations || []);
     } catch (err) {
@@ -69,7 +70,7 @@ function SearchContent() {
 
   const fetchCompanies = async () => {
     try {
-      const res = await fetch(`${MANAGER_URL}/search/companies`);
+      const res = await fetch(`${API_BASE}/companies`);
       const data = await res.json();
       setCompanies(data.companies || []);
     } catch (err) {
@@ -90,7 +91,7 @@ function SearchContent() {
       params.set('page', page.toString());
       params.set('limit', '12');
 
-      const res = await fetch(`${MANAGER_URL}/search?${params}`);
+      const res = await fetch(`${API_BASE}?${params}`);
       const data = await res.json();
 
       setResults(data.results || []);

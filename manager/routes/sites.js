@@ -5,6 +5,7 @@ const db = require('../config/database');
 const { slugPattern, skillsCatalog } = require('../config/constants');
 const { normalizeSkills } = require('../utils/helpers');
 const { crawlPortfolio, buildSearchText } = require('../utils/crawler');
+const { submitPortfolioToIndexNow } = require('../utils/indexnow');
 
 // Queue build function
 const queueBuild = ({ name, repoUrl, contact, skills }, res) => {
@@ -78,6 +79,11 @@ const queueBuild = ({ name, repoUrl, contact, skills }, res) => {
                                     console.error(`❌ Crawl save error for ${name}:`, err);
                                 } else {
                                     console.log(`✅ Metadata saved for ${name}`);
+                                    
+                                    // Submit to IndexNow for instant indexing
+                                    submitPortfolioToIndexNow(name).catch(err => {
+                                        console.error(`IndexNow submission error: ${err.message}`);
+                                    });
                                 }
                             });
                         }
