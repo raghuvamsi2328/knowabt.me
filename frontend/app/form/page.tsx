@@ -1,7 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useAuth } from "../hooks/useAuth";
+import { useRouter } from "next/navigation";
 
 export default function FormPage() {
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [form, setForm] = useState({
     subdomain: "",
     gitUrl: "",
@@ -15,6 +19,24 @@ export default function FormPage() {
     "idle" | "checking" | "available" | "taken" | "invalid" | "error"
   >("idle");
   const [suggestedSkills, setSuggestedSkills] = useState<string[]>([]);
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, authLoading, router]);
+
+  // Pre-fill contact info if user is logged in
+  useEffect(() => {
+    if (user && !form.contact) {
+      setForm((prev) => ({ 
+        ...prev, 
+        contact: user.email || '',
+        subdomain: user.username || ''
+      }));
+    }
+  }, [user]);
 
   useEffect(() => {
     const fetchTopSkills = async () => {
@@ -101,24 +123,34 @@ export default function FormPage() {
     );
   }
 
-  if (loading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#D8DAD3] px-4">
         <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md text-center">
           <div className="mb-4 animate-spin mx-auto w-10 h-10 border-4 border-[#566246] border-t-transparent rounded-full"></div>
-          <div className="text-lg font-semibold text-[#4A4A48]">Submitting your request...</div>
+          <div className="text-lg font-semibold text-[#4A4A48]">Loading...</div>
         </div>
       </div>
     );
   }
 
+  if (!user) {
+    return null; // Will redirect to login
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#D8DAD3] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#D8DAD3] px-4 py-12">
       <form
         onSubmit={handleSubmit}
         className="bg-white rounded-lg shadow-lg p-8 w-full max-w-lg"
       >
-        <h1 className="text-2xl font-bold mb-6 text-[#566246]">Host your site on knowabt.me</h1>
+        {/* User Welcome Header */}
+        <div className="mb-6 pb-4 border-b border-gray-200">
+          <h1 className="text-2xl font-bold text-[#566246]">Host your site on knowabt.me</h1>
+          <p className="text-sm text-gray-600 mt-2">
+            Welcome, <span className="font-semibold text-[#566246]">{user.username}</span>!
+          </p>
+        </div>
         {error && <div className="mb-4 text-red-600">{error}</div>}
         <label className="block mb-4">
           <span className="block mb-1 font-medium" style={{ color: '#4A4A48' }}>Subdomain</span>
@@ -194,10 +226,27 @@ export default function FormPage() {
         </label>
         <button
           type="submit"
-          className="w-full bg-[#566246] text-white font-semibold py-3 rounded hover:bg-[#4A4A48] transition"
+          disabled={loading}
+          className="w-full bg-[#566246] text-white font-semibold py-3 rounded hover:bg-[#4A4A48] transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Submit
+          {loading ? (
+            <span className="flex items-center justify-center gap-2">
+              <span className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></span>
+              Submitting...
+            </span>
+          ) : (
+            'Submit'
+          )}
         </button>
+        <div className="mt-4 text-center">
+          <button
+            type="button"
+            onClick={() => router.push('/profile')}
+            className="text-[#566246] hover:underline text-sm"
+          >
+            View My Profile
+          </button>
+        </div>
       </form>
     </div>
   );

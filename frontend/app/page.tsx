@@ -102,13 +102,21 @@ export default function Home() {
           {!loading && (
             user ? (
               <div className="flex items-center gap-3">
-                <Image
-                  src={user.avatar_url || '/Remove-background-project-cropped.svg'}
-                  alt={user.username}
-                  width={36}
-                  height={36}
-                  className="rounded-full"
-                />
+                <button
+                  onClick={() => router.push('/profile')}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full font-medium hover:bg-white/10 transition"
+                >
+                  <Image
+                    src={user.avatar_url || '/Remove-background-project-cropped.svg'}
+                    alt={user.username}
+                    width={36}
+                    height={36}
+                    className="rounded-full"
+                  />
+                  <span style={{ color: COLORS.textDark }} className="font-semibold">
+                    {user.username}
+                  </span>
+                </button>
                 <button
                   onClick={logout}
                   className="px-4 py-2 rounded-full font-medium hover:opacity-80 transition text-sm"

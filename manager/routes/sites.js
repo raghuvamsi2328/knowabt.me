@@ -4,6 +4,7 @@ const { exec } = require('child_process');
 const db = require('../config/database');
 const { slugPattern, skillsCatalog } = require('../config/constants');
 const { normalizeSkills } = require('../utils/helpers');
+const { crawlPortfolio, buildSearchText } = require('../utils/crawler');
 
 // Queue build function
 const queueBuild = ({ name, repoUrl, contact, skills }, res) => {
@@ -31,7 +32,60 @@ const queueBuild = ({ name, repoUrl, contact, skills }, res) => {
                 return;
             }
             console.log(`Build Success for ${name}`);
-            db.run('UPDATE sites SET status = ? WHERE name = ?', ['success', name]);
+            db.run('UPDATE sites SET status = ? WHERE name = ?', ['success', name], async () => {
+                // Crawl the deployed site to extract metadata
+                setTimeout(async () => {
+                    try {
+                        const siteUrl = `https://${name}.knowabt.me`;
+                        console.log(`🕷️  Crawling ${siteUrl} for metadata...`);
+                        const metadata = await crawlPortfolio(siteUrl);
+                        
+                        if (metadata) {
+                            const searchText = buildSearchText({
+                                name,
+                                skills,
+                                ...metadata
+                            });
+                            
+                            db.run(`
+                                UPDATE sites SET 
+                                    metadata_title = ?,
+                                    metadata_description = ?,
+                                    metadata_company = ?,
+                                    metadata_location = ?,
+                                    metadata_experience = ?,
+                                    metadata_education = ?,
+                                    metadata_bio = ?,
+                                    metadata_social_links = ?,
+                                    metadata_projects = ?,
+                                    metadata_crawled_at = datetime('now'),
+                                    search_text = ?
+                                WHERE name = ?
+                            `, [
+                                metadata.title,
+                                metadata.description,
+                                metadata.company,
+                                metadata.location,
+                                metadata.experience,
+                                metadata.education,
+                                metadata.bio,
+                                JSON.stringify(metadata.social_links),
+                                JSON.stringify(metadata.projects),
+                                searchText,
+                                name
+                            ], (err) => {
+                                if (err) {
+                                    console.error(`❌ Crawl save error for ${name}:`, err);
+                                } else {
+                                    console.log(`✅ Metadata saved for ${name}`);
+                                }
+                            });
+                        }
+                    } catch (error) {
+                        console.error(`❌ Crawl error for ${name}:`, error.message);
+                    }
+                }, 5000); // Wait 5 seconds for site to be fully available
+            });
         });
 
         return res.json({ message: 'Build initiated', folder: name });

@@ -39,10 +39,12 @@ const healthRoutes = require('./routes/health');
 const authRoutes = require('./routes/auth');
 const sitesRoutes = require('./routes/sites');
 const adminRoutes = require('./routes/admin');
+const searchRoutes = require('./routes/search');
 
 app.use('/health', healthRoutes);
 app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
+app.use('/search', searchRoutes);
 
 // Sites routes (multiple paths for compatibility)
 app.use('/sites', sitesRoutes);

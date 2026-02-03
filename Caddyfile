@@ -37,6 +37,10 @@
         reverse_proxy manager:3000
     }
 
+    handle /search* {
+        reverse_proxy manager:3000
+    }
+
     handle /skills* {
         reverse_proxy manager:3000
     }
