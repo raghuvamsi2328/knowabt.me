@@ -2,6 +2,8 @@
 set -e
 
 export NODE_OPTIONS="${NODE_OPTIONS:---openssl-legacy-provider}"
+export npm_config_cache="/tmp/.npm"
+export HOME="/tmp"
 
 REPO_URL=$1
 OUTPUT_PATH=${2:-/output}
