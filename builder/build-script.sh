@@ -12,8 +12,12 @@ if [[ ! "$REPO_URL" =~ ^https://github\.com/ ]]; then
     exit 1
 fi
 
-# Clone with limited depth to save resources
-git clone --depth=1 "$REPO_URL" .
+echo "🔄 Cloning repository..."
+# Clone into /tmp/repo to avoid permission issues with read-only /app
+git clone --depth=1 "$REPO_URL" /tmp/repo
+cd /tmp/repo
+
+echo "📦 Repository cloned successfully"
 
 # Security: Scan package.json for suspicious commands
 if [ -f "package.json" ]; then
