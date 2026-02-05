@@ -47,11 +47,7 @@ app.use('/admin', adminRoutes);
 app.use('/search', searchRoutes);
 
 // Sites routes (multiple paths for compatibility)
-app.use('/sites', sitesRoutes);
-app.use('/skills', sitesRoutes);  // Mount directly for /skills routes
-app.use('/top-repos', sitesRoutes);
-app.use('/deploy', sitesRoutes);
-app.use('/deployments', sitesRoutes);
+app.use('/', sitesRoutes);
 
 // Start server
 const PORT = process.env.PORT || 3000;
