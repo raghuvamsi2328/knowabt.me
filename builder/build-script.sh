@@ -6,9 +6,41 @@ export NODE_OPTIONS="${NODE_OPTIONS:---openssl-legacy-provider}"
 REPO_URL=$1
 OUTPUT_PATH=${2:-/output}
 
-git clone "$REPO_URL" .
-npm install
-npm run build
+# Security: Validate repository URL
+if [[ ! "$REPO_URL" =~ ^https://github\.com/ ]]; then
+    echo "ERROR: Only GitHub repositories are allowed"
+    exit 1
+fi
+
+# Clone with limited depth to save resources
+git clone --depth=1 "$REPO_URL" .
+
+# Security: Scan package.json for suspicious commands
+if [ -f "package.json" ]; then
+    # Check for dangerous patterns in scripts
+    SUSPICIOUS_PATTERNS=(
+        "curl.*sh"
+        "wget.*sh"
+        "eval"
+        "rm -rf /"
+        "chmod 777"
+        "> /etc/"
+        "nc -l"
+        "bash -i"
+        "/dev/tcp"
+    )
+    
+    for pattern in "${SUSPICIOUS_PATTERNS[@]}"; do
+        if grep -qE "$pattern" package.json; then
+            echo "ERROR: Suspicious command detected in package.json: $pattern"
+            exit 1
+        fi
+    done
+fi
+
+# Run build with timeout (10 minutes max)
+timeout 600 npm install --production=false --ignore-scripts
+timeout 600 npm run build
 
 # Find the index.html that is actually part of a build (dist/build/out/browser)
 REAL_INDEX=$(find . \

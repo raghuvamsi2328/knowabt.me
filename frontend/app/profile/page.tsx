@@ -39,7 +39,15 @@ export default function ProfilePage() {
         credentials: 'include'
       });
       const data = await response.json();
-      setSites(Array.isArray(data.sites) ? data.sites : []);
+      
+      // Handle both formats: { sites: [...] } and [...]
+      if (data.sites && Array.isArray(data.sites)) {
+        setSites(data.sites);
+      } else if (Array.isArray(data)) {
+        setSites(data);
+      } else {
+        setSites([]);
+      }
     } catch (error) {
       console.error('Failed to fetch sites:', error);
       setSites([]);

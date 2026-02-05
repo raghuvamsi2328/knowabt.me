@@ -6,9 +6,22 @@ const { slugPattern, skillsCatalog } = require('../config/constants');
 const { normalizeSkills } = require('../utils/helpers');
 const { crawlPortfolio, buildSearchText } = require('../utils/crawler');
 const { submitPortfolioToIndexNow } = require('../utils/indexnow');
+const { validateDeploymentRequest, checkRateLimit } = require('../utils/security');
 
 // Queue build function
-const queueBuild = ({ name, repoUrl, contact, skills }, res) => {
+const queueBuild = ({ name, repoUrl, contact, skills, userId }, res) => {
+    // Security validation
+    const validation = validateDeploymentRequest({ name, repoUrl, contact, skills });
+    if (!validation.valid) {
+        return res.status(400).json({ error: validation.error });
+    }
+    
+    // Rate limiting (by subdomain name as identifier)
+    const rateLimitCheck = checkRateLimit(name);
+    if (!rateLimitCheck.allowed) {
+        return res.status(429).json({ error: rateLimitCheck.error });
+    }
+    
     if (!slugPattern.test(name)) {
         return res.status(400).json({ error: 'Invalid subdomain. Use letters, numbers, and hyphens only.' });
     }
@@ -18,13 +31,27 @@ const queueBuild = ({ name, repoUrl, contact, skills }, res) => {
         if (row) return res.status(409).json({ error: 'Subdomain is already taken.' });
 
         db.run(
-            'INSERT INTO sites (name, url, status, contact, skills) VALUES (?, ?, ?, ?, ?)',
-            [name, repoUrl, 'building', contact || null, skills || null]
+            'INSERT INTO sites (name, url, status, contact, skills, user_id) VALUES (?, ?, ?, ?, ?, ?)',
+            [name, repoUrl, 'building', contact || null, skills || null, userId || null]
         );
 
         const outputVolume = `/var/www/portfolios/${name}`;
         const builderImage = process.env.BUILDER_IMAGE || 'portfolio-builder';
-        const dockerCmd = `docker run --rm -v ${outputVolume}:/output ${builderImage} ${repoUrl}`;
+        
+        // Security-hardened Docker command
+        const dockerCmd = `docker run --rm \
+            --read-only \
+            --tmpfs /tmp:rw,noexec,nosuid \
+            --tmpfs /app:rw,exec,nosuid \
+            --network none \
+            --memory="512m" \
+            --cpus="1.0" \
+            --security-opt=no-new-privileges \
+            --cap-drop=ALL \
+            -v ${outputVolume}:/output:rw \
+            ${builderImage} ${repoUrl}`;
+        
+        console.log(`🔨 Starting secure build for ${name}...`);
         
         exec(dockerCmd, (error, stdout, stderr) => {
             if (error) {
@@ -98,12 +125,21 @@ const queueBuild = ({ name, repoUrl, contact, skills }, res) => {
     });
 };
 
-// List all deployments
+// List all deployments (filtered by user if authenticated)
 router.get('/deployments', (req, res) => {
-    db.all('SELECT * FROM sites ORDER BY created_at DESC', [], (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json(rows);
-    });
+    // If user is authenticated, return only their sites
+    if (req.isAuthenticated() && req.user) {
+        db.all('SELECT * FROM sites WHERE user_id = ? ORDER BY created_at DESC', [req.user.id], (err, rows) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ sites: rows, user: req.user });
+        });
+    } else {
+        // For non-authenticated users, return all sites
+        db.all('SELECT * FROM sites ORDER BY created_at DESC', [], (err, rows) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json(rows);
+        });
+    }
 });
 
 // Deploy endpoint (legacy)
@@ -112,7 +148,8 @@ router.post('/deploy', (req, res) => {
     if (!name || !repoUrl) {
         return res.status(400).json({ error: 'Missing name or repoUrl' });
     }
-    return queueBuild({ name, repoUrl }, res);
+    const userId = req.isAuthenticated() ? req.user.id : null;
+    return queueBuild({ name, repoUrl, userId }, res);
 });
 
 // Form submission endpoint
@@ -121,7 +158,8 @@ router.post('/', (req, res) => {
     if (!subdomain || !gitUrl || !contact || !skills) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
-    return queueBuild({ name: subdomain, repoUrl: gitUrl, contact, skills }, res);
+    const userId = req.isAuthenticated() ? req.user.id : null;
+    return queueBuild({ name: subdomain, repoUrl: gitUrl, contact, skills, userId }, res);
 });
 
 // Check subdomain availability
@@ -137,12 +175,21 @@ router.get('/check', (req, res) => {
     });
 });
 
-// List all sites
+// List all sites (filtered by user if authenticated)
 router.get('/', (req, res) => {
-    db.all('SELECT * FROM sites ORDER BY created_at DESC', [], (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json(rows);
-    });
+    // If user is authenticated, return only their sites
+    if (req.isAuthenticated() && req.user) {
+        db.all('SELECT * FROM sites WHERE user_id = ? ORDER BY created_at DESC', [req.user.id], (err, rows) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ sites: rows, user: req.user });
+        });
+    } else {
+        // For non-authenticated users, return all sites (for public listing/search)
+        db.all('SELECT * FROM sites ORDER BY created_at DESC', [], (err, rows) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json(rows);
+        });
+    }
 });
 
 // Fetch skills catalog
