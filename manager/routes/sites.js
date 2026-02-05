@@ -192,28 +192,21 @@ router.get('/', (req, res) => {
     }
 });
 
-// Fetch skills catalog
-router.get('/skills', (req, res) => {
-    res.json({ skills: skillsCatalog });
-});
-
-// Fetch top skills based on submissions
-router.get('/skills/top', (req, res) => {
-    db.all('SELECT skills FROM sites WHERE skills IS NOT NULL AND skills != ""', [], (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
-        const counts = new Map();
-        rows.forEach((row) => {
-            normalizeSkills(row.skills).forEach((skill) => {
-                const key = skill.toLowerCase();
-                counts.set(key, (counts.get(key) || 0) + 1);
-            });
+// List all sites (filtered by user if authenticated)
+router.get('/', (req, res) => {
+    // If user is authenticated, return only their sites
+    if (req.isAuthenticated() && req.user) {
+        db.all('SELECT * FROM sites WHERE user_id = ? ORDER BY created_at DESC', [req.user.id], (err, rows) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ sites: rows, user: req.user });
         });
-        const topSkills = [...counts.entries()]
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 3)
-            .map(([skill]) => skill);
-        res.json({ skills: topSkills });
-    });
+    } else {
+        // For non-authenticated users, return all sites (for public listing/search)
+        db.all('SELECT * FROM sites ORDER BY created_at DESC', [], (err, rows) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json(rows);
+        });
+    }
 });
 
 // Fetch top repos from database

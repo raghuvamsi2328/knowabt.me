@@ -38,6 +38,7 @@ app.use('/portfolios', express.static('/var/www/portfolios'));
 const healthRoutes = require('./routes/health');
 const authRoutes = require('./routes/auth');
 const sitesRoutes = require('./routes/sites');
+const skillsRoutes = require('./routes/skills');
 const adminRoutes = require('./routes/admin');
 const searchRoutes = require('./routes/search');
 
@@ -46,8 +47,12 @@ app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
 app.use('/search', searchRoutes);
 
-// Sites routes (multiple paths for compatibility)
-app.use('/', sitesRoutes);
+// Sites and skills routes
+app.use('/sites', sitesRoutes);
+app.use('/skills', skillsRoutes);
+app.use('/deploy', sitesRoutes);
+app.use('/deployments', sitesRoutes);
+app.use('/top-repos', sitesRoutes);
 
 // Start server
 const PORT = process.env.PORT || 3000;
