@@ -44,8 +44,9 @@ const queueBuild = ({ name, repoUrl, contact, skills, userId }, res) => {
             --read-only \
             --tmpfs /tmp:rw,exec,nosuid,size=1g \
             --tmpfs /app:rw,exec,nosuid \
+            --tmpfs /home/builder:rw,exec,nosuid,size=512m \
             --network bridge \
-            --memory="512m" \
+            --memory="1g" \
             --cpus="1.0" \
             --security-opt=no-new-privileges \
             --cap-drop=ALL \
