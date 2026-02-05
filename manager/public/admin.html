@@ -110,6 +110,20 @@
         </thead>
         <tbody id="rows"></tbody>
       </table>
+
+      <hr style="margin: 32px 0; border: none; border-top: 1px solid #ddd;" />
+
+      <h3 style="color: #566246; margin-bottom: 12px;">Container Logs</h3>
+      <div class="row">
+        <select id="containerSelect" style="padding: 10px 12px; border-radius: 8px; border: 1px solid #c7c7c7; flex: 1;">
+          <option value="knowabt-manager">Manager</option>
+          <option value="knowabt-frontend">Frontend</option>
+          <option value="knowabt-caddy">Caddy</option>
+          <option value="portfolio-builder">Builder</option>
+        </select>
+        <button id="logsBtn">View Logs</button>
+      </div>
+      <pre id="logsOutput" style="background: #1e1e1e; color: #d4d4d4; padding: 16px; border-radius: 8px; overflow-x: auto; max-height: 400px; overflow-y: auto; font-size: 12px; line-height: 1.5;"></pre>
     </div>
 
     <script>
@@ -204,6 +218,45 @@
       };
 
       loadBtn.addEventListener('click', fetchSites);
+
+      // Logs Viewer
+      const logsBtn = document.getElementById('logsBtn');
+      const logsContainer = document.getElementById('logsContainer');
+      const logsOutput = document.getElementById('logsOutput');
+      const containerSelect = document.getElementById('containerSelect');
+
+      logsBtn.addEventListener('click', async () => {
+        const container = containerSelect.value;
+        const token = tokenInput.value.trim();
+        
+        if (!token) {
+          setError('Enter admin token first');
+          return;
+        }
+
+        setError('');
+        setMessage('Fetching logs...');
+        logsOutput.textContent = 'Loading...';
+
+        try {
+          const res = await fetch(`/admin/logs/${container}?lines=100`, {
+            headers: { 'x-admin-token': token },
+          });
+
+          const data = await res.json();
+          if (!res.ok) {
+            setError(data.error || 'Failed to fetch logs');
+            logsOutput.textContent = '';
+            return;
+          }
+
+          logsOutput.textContent = data.logs;
+          setMessage(`Logs for ${container} (last 100 lines)`);
+        } catch (err) {
+          setError('Failed to fetch logs');
+          logsOutput.textContent = '';
+        }
+      });
     </script>
   </body>
 </html>
