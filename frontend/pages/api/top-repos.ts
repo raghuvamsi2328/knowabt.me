@@ -8,7 +8,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const managerUrl = process.env.MANAGER_URL || 'http://localhost:3000';
 
   try {
-    const backendRes = await fetch(`${managerUrl}/top-repos`);
+    const backendRes = await fetch(`${managerUrl}/sites/top-repos`);
     
     if (!backendRes.ok) {
       return res.status(backendRes.status).json({ error: 'Failed to fetch from backend' });
