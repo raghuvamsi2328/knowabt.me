@@ -48,22 +48,10 @@ app.use('/search', searchRoutes);
 
 // Sites routes (multiple paths for compatibility)
 app.use('/sites', sitesRoutes);
-app.use('/deployments', (req, res, next) => {
-    req.url = '/';
-    sitesRoutes(req, res, next);
-});
-app.use('/deploy', (req, res, next) => {
-    req.url = '/deploy';
-    sitesRoutes(req, res, next);
-});
-app.use('/skills', (req, res, next) => {
-    req.url = req.url.replace('/skills', '/skills');
-    sitesRoutes(req, res, next);
-});
-app.use('/top-repos', (req, res, next) => {
-    req.url = '/top-repos';
-    sitesRoutes(req, res, next);
-});
+app.use('/skills', sitesRoutes);  // Mount directly for /skills routes
+app.use('/top-repos', sitesRoutes);
+app.use('/deploy', sitesRoutes);
+app.use('/deployments', sitesRoutes);
 
 // Start server
 const PORT = process.env.PORT || 3000;
