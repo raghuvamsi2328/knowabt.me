@@ -24,11 +24,11 @@ export default function FormPage() {
 
   // Redirect to login if not authenticated
   // TEMPORARILY DISABLED FOR TESTING
-  // useEffect(() => {
-  //   if (!authLoading && !user) {
-  //     router.push('/login');
-  //   }
-  // }, [user, authLoading, router]);
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, authLoading, router]);
 
   // Pre-fill contact info if user is logged in
   useEffect(() => {
