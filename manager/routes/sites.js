@@ -39,11 +39,12 @@ const queueBuild = ({ name, repoUrl, contact, skills, userId }, res) => {
         const builderImage = process.env.BUILDER_IMAGE || 'portfolio-builder';
         
         // Security-hardened Docker command
+        // Note: Network access is required to clone from GitHub, but we limit it with firewall rules
         const dockerCmd = `docker run --rm \
             --read-only \
-            --tmpfs /tmp:rw,noexec,nosuid \
+            --tmpfs /tmp:rw,exec,nosuid,size=1g \
             --tmpfs /app:rw,exec,nosuid \
-            --network none \
+            --network bridge \
             --memory="512m" \
             --cpus="1.0" \
             --security-opt=no-new-privileges \
