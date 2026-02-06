@@ -150,7 +150,13 @@ router.post('/deploy', (req, res) => {
     if (!name || !repoUrl) {
         return res.status(400).json({ error: 'Missing name or repoUrl' });
     }
-    const userId = req.isAuthenticated() ? req.user.id : null;
+    
+    // Require authentication
+    if (!req.isAuthenticated() || !req.user) {
+        return res.status(401).json({ error: 'Authentication required. Please log in to deploy.' });
+    }
+    
+    const userId = req.user.id;
     return queueBuild({ name, repoUrl, userId }, res);
 });
 
@@ -160,7 +166,13 @@ router.post('/', (req, res) => {
     if (!subdomain || !gitUrl || !contact || !skills) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
-    const userId = req.isAuthenticated() ? req.user.id : null;
+    
+    // Require authentication for new submissions
+    if (!req.isAuthenticated() || !req.user) {
+        return res.status(401).json({ error: 'Authentication required. Please log in to create a portfolio.' });
+    }
+    
+    const userId = req.user.id;
     return queueBuild({ name: subdomain, repoUrl: gitUrl, contact, skills, userId }, res);
 });
 

@@ -12,7 +12,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const backendRes = await fetch(`${managerUrl}/sites`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        // Forward cookies from the client request to the backend
+        ...(req.headers.cookie ? { 'Cookie': req.headers.cookie } : {})
+      },
       body: JSON.stringify({ subdomain, gitUrl, contact, skills }),
     });
     if (!backendRes.ok) {

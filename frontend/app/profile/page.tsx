@@ -35,7 +35,7 @@ export default function ProfilePage() {
   const fetchUserSites = async () => {
     try {
       const MANAGER_URL = process.env.NEXT_PUBLIC_MANAGER_URL || 'http://localhost:3000';
-      const response = await fetch(`${MANAGER_URL}/sites`, {
+      const response = await fetch(`${MANAGER_URL}/deployments`, {
         credentials: 'include'
       });
       const data = await response.json();
