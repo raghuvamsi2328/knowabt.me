@@ -48,6 +48,9 @@ fi
 timeout 600 npm install --production=false --ignore-scripts
 timeout 600 npm run build
 
+# Ensure output dir is clean to avoid file exists errors
+rm -rf "$OUTPUT_PATH"/*
+
 # Find the index.html that is actually part of a build (dist/build/out/browser)
 REAL_INDEX=$(find . \
     -path "*/dist/*/index.html" -o \
