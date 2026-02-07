@@ -21,6 +21,7 @@ export default function FormPage() {
   const [availableSkills, setAvailableSkills] = useState<string[]>([]);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [skillSearchQuery, setSkillSearchQuery] = useState<string>("");
+  const [hasExistingPortfolio, setHasExistingPortfolio] = useState<boolean>(false);
 
   // Redirect to login if not authenticated
   // TEMPORARILY DISABLED FOR TESTING
@@ -41,6 +42,25 @@ export default function FormPage() {
     }
   }, [user, form.contact]);
 
+  // Check if user already has a portfolio
+  useEffect(() => {
+    const fetchUserSites = async () => {
+      if (!user) return;
+      try {
+        const MANAGER_URL = process.env.NEXT_PUBLIC_MANAGER_URL || 'http://localhost:3000';
+        const response = await fetch(`${MANAGER_URL}/deployments`, {
+          credentials: 'include'
+        });
+        const data = await response.json();
+        const sites = Array.isArray(data?.sites) ? data.sites : Array.isArray(data) ? data : [];
+        setHasExistingPortfolio(sites.length > 0);
+      } catch (error) {
+        setHasExistingPortfolio(false);
+      }
+    };
+    fetchUserSites();
+  }, [user]);
+
   // Fetch available skills from API
   useEffect(() => {
     const fetchSkills = async () => {
@@ -52,10 +72,14 @@ export default function FormPage() {
       } catch (err) {
         // Fallback to default skills if API fails
         setAvailableSkills([
-          'React', 'Next.js', 'TypeScript', 'Node.js', 'Express',
-          'Tailwind CSS', 'HTML', 'CSS', 'JavaScript', 'Vue',
-          'Angular', 'Python', 'Docker', 'Git', 'Figma', 
-          'UI/UX', 'SEO', 'MongoDB', 'PostgreSQL', 'AWS'
+          'React', 'React Native', 'Next.js', 'Svelte', 'SolidJS', 'Vue', 'Angular',
+          'TypeScript', 'Node.js', 'Express', 'NestJS', 'Fastify', 'GraphQL', 'REST API',
+          'Prisma', 'Mongoose', 'Tailwind CSS', 'Bootstrap', 'Material UI', 'HTML', 'CSS',
+          'JavaScript', 'Python', 'Django', 'Flask', 'Go', 'Rust', 'Java', 'Spring',
+          'Kotlin', 'Swift', 'Flutter', 'SQLite', 'MySQL', 'PostgreSQL', 'MongoDB',
+          'Redis', 'Docker', 'Kubernetes', 'CI/CD', 'GitHub Actions', 'Vercel',
+          'Netlify', 'Caddy', 'Git', 'Linux', 'Bash', 'Jest', 'Cypress', 'Playwright',
+          'Figma', 'UI/UX', 'SEO', 'Analytics', 'Markdown', 'Open Source'
         ]);
       }
     };
@@ -151,7 +175,10 @@ export default function FormPage() {
     });
     setLoading(false);
     if (res.ok) setSubmitted(true);
-    else setError("Submission failed. Try again later.");
+    else {
+      const payload = await res.json().catch(() => ({ error: "Submission failed." }));
+      setError(payload.error || "Submission failed. Try again later.");
+    }
   };
 
   if (submitted) {
@@ -199,6 +226,11 @@ export default function FormPage() {
             </p>
           </div>
         {error && <div className="mb-4 text-red-600">{error}</div>}
+        {hasExistingPortfolio && (
+          <div className="mb-4 text-amber-700 bg-amber-50 border border-amber-200 rounded p-3 text-sm">
+            You already have a portfolio. Only one portfolio is allowed per account.
+          </div>
+        )}
         <label className="block mb-4">
           <span className="block mb-1 font-medium" style={{ color: '#4A4A48' }}>Subdomain</span>
           <div className="flex items-center">
@@ -278,7 +310,7 @@ export default function FormPage() {
           </div>
 
           {/* Skills Chips */}
-          <div className="flex flex-wrap gap-2 max-h-60 overflow-y-auto p-2 border border-gray-200 rounded bg-gray-50">
+          <div className="flex flex-nowrap gap-2 overflow-x-auto whitespace-nowrap p-2 border border-gray-200 rounded bg-gray-50">
             {filteredSkills.length > 0 ? (
               filteredSkills.map((skill) => {
                 const isSelected = selectedSkills.includes(skill);
@@ -351,7 +383,7 @@ export default function FormPage() {
         </div>
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || hasExistingPortfolio}
           className="w-full bg-[#566246] text-white font-semibold py-3 rounded hover:bg-[#4A4A48] transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (

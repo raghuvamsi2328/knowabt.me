@@ -56,6 +56,42 @@ const sendDeploymentSuccessEmail = async ({ to, subdomain, siteUrl }) => {
     }
 };
 
+const sendDeleteRequestEmail = async ({ requesterEmail, subdomain, siteUrl }) => {
+    const transporter = buildTransporter();
+    if (!transporter) {
+        return { ok: false, error: 'SMTP credentials not configured' };
+    }
+
+    const adminEmail = process.env.ADMIN_EMAIL;
+    if (!adminEmail) {
+        return { ok: false, error: 'Admin email not configured' };
+    }
+
+    const from = process.env.MAIL_FROM || 'knowabt.me <hello@knowabt.me>';
+    const subject = `Delete request: ${subdomain}.knowabt.me`;
+    const text = `Delete request received\n\nSite: ${siteUrl}\nRequested by: ${requesterEmail || 'unknown'}\n\nPlease review and delete if approved.`;
+    const html = `
+        <p><strong>Delete request received</strong></p>
+        <p><strong>Site:</strong> <a href="${siteUrl}">${siteUrl}</a></p>
+        <p><strong>Requested by:</strong> ${requesterEmail || 'unknown'}</p>
+        <p>Please review and delete if approved.</p>
+    `;
+
+    try {
+        await transporter.sendMail({
+            from,
+            to: adminEmail,
+            subject,
+            text,
+            html
+        });
+        return { ok: true };
+    } catch (error) {
+        return { ok: false, error: error.message || 'Send failed' };
+    }
+};
+
 module.exports = {
-    sendDeploymentSuccessEmail
+    sendDeploymentSuccessEmail,
+    sendDeleteRequestEmail
 };

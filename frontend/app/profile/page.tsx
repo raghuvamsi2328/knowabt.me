@@ -19,6 +19,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const [sites, setSites] = useState<Site[]>([]);
   const [loadingSites, setLoadingSites] = useState(true);
+  const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (!loading && !user) {
@@ -59,6 +60,50 @@ export default function ProfilePage() {
   const handleLogout = async () => {
     await logout();
     router.push('/');
+  };
+
+  const handleRebuild = async (name: string) => {
+    try {
+      setActionLoading((prev) => ({ ...prev, [name]: true }));
+      const MANAGER_URL = process.env.NEXT_PUBLIC_MANAGER_URL || 'http://localhost:3000';
+      const response = await fetch(`${MANAGER_URL}/sites/${encodeURIComponent(name)}/rebuild`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({ error: 'Rebuild failed' }));
+        alert(payload.error || 'Rebuild failed');
+      } else {
+        await fetchUserSites();
+      }
+    } catch (error) {
+      alert('Rebuild failed');
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [name]: false }));
+    }
+  };
+
+  const handleDeleteRequest = async (name: string) => {
+    const confirmed = confirm('Request deletion of this portfolio and all data?');
+    if (!confirmed) return;
+    try {
+      setActionLoading((prev) => ({ ...prev, [name]: true }));
+      const MANAGER_URL = process.env.NEXT_PUBLIC_MANAGER_URL || 'http://localhost:3000';
+      const response = await fetch(`${MANAGER_URL}/sites/${encodeURIComponent(name)}/request-delete`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({ error: 'Delete request failed' }));
+        alert(payload.error || 'Delete request failed');
+      } else {
+        await fetchUserSites();
+      }
+    } catch (error) {
+      alert('Delete request failed');
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [name]: false }));
+    }
   };
 
   if (loading) {
@@ -144,7 +189,7 @@ export default function ProfilePage() {
             <h2 className="text-2xl font-bold text-[#566246]">
               {totalSites > 0 ? 'Your Portfolios' : 'Get Started with Your Free Portfolio'}
             </h2>
-            {totalSites > 0 && (
+            {totalSites === 0 && (
               <button
                 onClick={() => router.push('/form')}
                 className="px-4 py-2 bg-[#566246] text-white rounded hover:bg-[#4A4A48] transition"
@@ -153,6 +198,11 @@ export default function ProfilePage() {
               </button>
             )}
           </div>
+          {totalSites > 0 && (
+            <p className="text-sm text-gray-500 mb-4">
+              Only one portfolio is allowed per account.
+            </p>
+          )}
 
           {loadingSites ? (
             <div className="flex justify-center py-8">
@@ -249,14 +299,30 @@ export default function ProfilePage() {
                       </p>
                     </div>
                     {site.status === 'success' && (
-                      <a
-                        href={`https://${site.name}.knowabt.me`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="ml-4 px-4 py-2 bg-[#566246] text-white rounded hover:bg-[#4A4A48] transition"
-                      >
-                        Visit Site
-                      </a>
+                      <div className="ml-4 flex flex-col gap-2 items-end">
+                        <a
+                          href={`https://${site.name}.knowabt.me`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-4 py-2 bg-[#566246] text-white rounded hover:bg-[#4A4A48] transition"
+                        >
+                          Visit Site
+                        </a>
+                        <button
+                          onClick={() => handleRebuild(site.name)}
+                          disabled={!!actionLoading[site.name]}
+                          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:opacity-50"
+                        >
+                          {actionLoading[site.name] ? 'Rebuilding...' : 'Rebuild'}
+                        </button>
+                        <button
+                          onClick={() => handleDeleteRequest(site.name)}
+                          disabled={!!actionLoading[site.name]}
+                          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition disabled:opacity-50"
+                        >
+                          Request Delete
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
