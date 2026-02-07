@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { exec } = require('child_process');
+const fs = require('fs/promises');
 const db = require('../config/database');
 const { slugPattern, skillsCatalog } = require('../config/constants');
 const { normalizeSkills } = require('../utils/helpers');
@@ -57,8 +58,17 @@ const queueBuild = ({ name, repoUrl, contact, skills, userId }, res) => {
                 ${builderImage} ${repoUrl}`;
             
             console.log(`🔨 Starting secure build for ${name}...`);
+
+            const ensureOutputDir = async () => {
+                try {
+                    await fs.mkdir(outputVolume, { recursive: true });
+                    await fs.chmod(outputVolume, 0o777);
+                } catch (error) {
+                    console.error(`Failed to prepare output dir for ${name}:`, error.message);
+                }
+            };
             
-            exec(dockerCmd, (error, stdout, stderr) => {
+            ensureOutputDir().finally(() => exec(dockerCmd, (error, stdout, stderr) => {
                 if (error) {
                     console.error(`Build Error for ${name}: ${stderr}`);
                     db.run('UPDATE sites SET status = ? WHERE name = ?', ['failed', name]);
@@ -137,7 +147,7 @@ const queueBuild = ({ name, repoUrl, contact, skills, userId }, res) => {
                         }
                     }, 5000); // Wait 5 seconds for site to be fully available
                 });
-            });
+            }));
 
             return res.json({ message: 'Build initiated', folder: name });
         });
@@ -224,7 +234,16 @@ router.post('/:name/rebuild', (req, res) => {
             -v ${outputVolume}:/output:rw \
             ${builderImage} ${repoUrl}`;
 
-        exec(dockerCmd, (error, stdout, stderr) => {
+        const ensureOutputDir = async () => {
+            try {
+                await fs.mkdir(outputVolume, { recursive: true });
+                await fs.chmod(outputVolume, 0o777);
+            } catch (error) {
+                console.error(`Failed to prepare output dir for ${name}:`, error.message);
+            }
+        };
+
+        ensureOutputDir().finally(() => exec(dockerCmd, (error, stdout, stderr) => {
             if (error) {
                 console.error(`Build Error for ${name}: ${stderr}`);
                 db.run('UPDATE sites SET status = ? WHERE name = ?', ['failed', name]);
@@ -288,7 +307,7 @@ router.post('/:name/rebuild', (req, res) => {
                     }
                 }, 5000);
             });
-        });
+        }));
 
         return res.json({ message: 'Rebuild initiated' });
     });

@@ -50,6 +50,8 @@ timeout 600 npm run build
 
 # Ensure output dir is clean to avoid file exists errors
 mkdir -p "$OUTPUT_PATH"
+chmod -R 777 "$OUTPUT_PATH" || true
+chown -R 0:0 "$OUTPUT_PATH" || true
 rm -rf "$OUTPUT_PATH"/* || true
 
 # Find the index.html that is actually part of a build (dist/build/out/browser)
