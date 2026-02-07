@@ -17,7 +17,7 @@ ENV NODE_OPTIONS=--openssl-legacy-provider
 COPY build-script.sh /usr/local/bin/build-script.sh
 RUN chmod +x /usr/local/bin/build-script.sh
 
-# Switch to non-root user
-USER builder
+# Run as root to allow writing to mounted /output
+USER root
 
 ENTRYPOINT ["build-script.sh"]
