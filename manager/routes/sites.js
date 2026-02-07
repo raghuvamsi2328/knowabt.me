@@ -6,6 +6,7 @@ const { slugPattern, skillsCatalog } = require('../config/constants');
 const { normalizeSkills } = require('../utils/helpers');
 const { crawlPortfolio, buildSearchText } = require('../utils/crawler');
 const { submitPortfolioToIndexNow } = require('../utils/indexnow');
+const { sendDeploymentSuccessEmail } = require('../utils/mailer');
 const { validateDeploymentRequest, checkRateLimit } = require('../utils/security');
 
 // Queue build function
@@ -63,6 +64,19 @@ const queueBuild = ({ name, repoUrl, contact, skills, userId }, res) => {
             }
             console.log(`Build Success for ${name}`);
             db.run('UPDATE sites SET status = ? WHERE name = ?', ['success', name], async () => {
+                if (contact) {
+                    const siteUrl = `https://${name}.knowabt.me`;
+                    sendDeploymentSuccessEmail({
+                        to: contact,
+                        subdomain: name,
+                        siteUrl
+                    }).then((result) => {
+                        if (!result.ok) {
+                            console.error(`Email send error for ${name}: ${result.error}`);
+                        }
+                    });
+                }
+
                 // Crawl the deployed site to extract metadata
                 setTimeout(async () => {
                     try {
