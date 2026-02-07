@@ -7,7 +7,7 @@ const { slugPattern, skillsCatalog } = require('../config/constants');
 const { normalizeSkills } = require('../utils/helpers');
 const { crawlPortfolio, buildSearchText } = require('../utils/crawler');
 const { submitPortfolioToIndexNow } = require('../utils/indexnow');
-const { sendDeploymentSuccessEmail, sendDeleteRequestEmail } = require('../utils/mailer');
+const { sendDeploymentSuccessEmail, sendDeleteRequestEmail, sendDeploymentFailedEmail } = require('../utils/mailer');
 const { validateDeploymentRequest, checkRateLimit } = require('../utils/security');
 
 // Queue build function
@@ -72,6 +72,20 @@ const queueBuild = ({ name, repoUrl, contact, skills, userId }, res) => {
                 if (error) {
                     console.error(`Build Error for ${name}: ${stderr}`);
                     db.run('UPDATE sites SET status = ? WHERE name = ?', ['failed', name]);
+                    if (contact) {
+                        const siteUrl = `https://${name}.knowabt.me`;
+                        sendDeploymentFailedEmail({
+                            to: contact,
+                            subdomain: name,
+                            siteUrl,
+                            name: name,
+                            reason: (stderr || error.message || 'Build failed')
+                        }).then((result) => {
+                            if (!result.ok) {
+                                console.error(`Email send error for ${name}: ${result.error}`);
+                            }
+                        });
+                    }
                     return;
                 }
                 console.log(`Build Success for ${name}`);
@@ -247,6 +261,20 @@ router.post('/:name/rebuild', (req, res) => {
             if (error) {
                 console.error(`Build Error for ${name}: ${stderr}`);
                 db.run('UPDATE sites SET status = ? WHERE name = ?', ['failed', name]);
+                if (contact) {
+                    const siteUrl = `https://${name}.knowabt.me`;
+                    sendDeploymentFailedEmail({
+                        to: contact,
+                        subdomain: name,
+                        siteUrl,
+                        name: name,
+                        reason: (stderr || error.message || 'Build failed')
+                    }).then((result) => {
+                        if (!result.ok) {
+                            console.error(`Email send error for ${name}: ${result.error}`);
+                        }
+                    });
+                }
                 return;
             }
             console.log(`Rebuild Success for ${name}`);

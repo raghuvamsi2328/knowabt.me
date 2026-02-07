@@ -373,7 +373,7 @@ export default function Home() {
               <ul className="space-y-2">
                 <li>
                   <a
-                    href="/features"
+                    href="/info#features"
                     className="text-sm hover:underline"
                     style={{ color: COLORS.highlight }}
                   >
@@ -382,7 +382,7 @@ export default function Home() {
                 </li>
                 <li>
                   <a
-                    href="#how"
+                    href="/info#how-it-works"
                     className="text-sm hover:underline"
                     style={{ color: COLORS.highlight }}
                   >
@@ -391,7 +391,7 @@ export default function Home() {
                 </li>
                 <li>
                   <a
-                    href="/pricing"
+                    href="/info#pricing"
                     className="text-sm hover:underline"
                     style={{ color: COLORS.highlight }}
                   >
@@ -400,7 +400,7 @@ export default function Home() {
                 </li>
                 <li>
                   <a
-                    href="/faq"
+                    href="/info#faq"
                     className="text-sm hover:underline"
                     style={{ color: COLORS.highlight }}
                   >
@@ -421,7 +421,7 @@ export default function Home() {
               <ul className="space-y-2">
                 <li>
                   <a
-                    href="/about"
+                    href="/info#about"
                     className="text-sm hover:underline"
                     style={{ color: COLORS.highlight }}
                   >
@@ -430,7 +430,7 @@ export default function Home() {
                 </li>
                 <li>
                   <a
-                    href="/contact"
+                    href="/info#contact"
                     className="text-sm hover:underline"
                     style={{ color: COLORS.highlight }}
                   >
@@ -439,7 +439,7 @@ export default function Home() {
                 </li>
                 <li>
                   <a
-                    href="/terms"
+                    href="/info#terms"
                     className="text-sm hover:underline"
                     style={{ color: COLORS.highlight }}
                   >
@@ -448,7 +448,7 @@ export default function Home() {
                 </li>
                 <li>
                   <a
-                    href="/privacy"
+                    href="/info#privacy"
                     className="text-sm hover:underline"
                     style={{ color: COLORS.highlight }}
                   >
