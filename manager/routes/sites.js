@@ -61,8 +61,8 @@ const queueBuild = ({ name, repoUrl, contact, skills, userId }, res) => {
 
             const ensureOutputDir = async () => {
                 try {
+                    await fs.rm(outputVolume, { recursive: true, force: true });
                     await fs.mkdir(outputVolume, { recursive: true });
-                    await fs.chmod(outputVolume, 0o777);
                 } catch (error) {
                     console.error(`Failed to prepare output dir for ${name}:`, error.message);
                 }
@@ -236,8 +236,8 @@ router.post('/:name/rebuild', (req, res) => {
 
         const ensureOutputDir = async () => {
             try {
+                await fs.rm(outputVolume, { recursive: true, force: true });
                 await fs.mkdir(outputVolume, { recursive: true });
-                await fs.chmod(outputVolume, 0o777);
             } catch (error) {
                 console.error(`Failed to prepare output dir for ${name}:`, error.message);
             }
