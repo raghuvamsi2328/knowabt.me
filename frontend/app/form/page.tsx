@@ -23,8 +23,6 @@ export default function FormPage() {
   const [skillSearchQuery, setSkillSearchQuery] = useState<string>("");
   const [hasExistingPortfolio, setHasExistingPortfolio] = useState<boolean>(false);
 
-  // Redirect to login if not authenticated
-  // TEMPORARILY DISABLED FOR TESTING
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login');
@@ -186,6 +184,15 @@ export default function FormPage() {
       <div className="max-w-lg mx-auto py-20 text-center">
         <h2 className="text-2xl font-bold mb-4">Thank you!</h2>
         <p>Your site request has been submitted. We’ll be in touch soon.</p>
+        <div className="mt-6">
+          <button
+            type="button"
+            onClick={() => router.push('/profile')}
+            className="px-6 py-3 bg-[#566246] text-white font-semibold rounded hover:bg-[#4A4A48] transition"
+          >
+            Go to Profile
+          </button>
+        </div>
       </div>
     );
   }
@@ -201,10 +208,15 @@ export default function FormPage() {
     );
   }
 
-  // TEMPORARILY ALLOW ACCESS WITHOUT LOGIN
-  // if (!user) {
-  //   return null; // Will redirect to login
-  // }
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#D8DAD3] px-4">
+        <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md text-center">
+          <div className="text-lg font-semibold text-[#4A4A48]">Redirecting to login...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#D8DAD3] px-4 py-12">

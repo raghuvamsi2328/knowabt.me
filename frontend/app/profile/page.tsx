@@ -115,218 +115,174 @@ export default function ProfilePage() {
   }
 
   if (!user) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#D8DAD3]">
+        <div className="text-sm text-[#566246]">Redirecting to login...</div>
+      </div>
+    );
   }
 
+  const profileUser = user;
+
+  const displaySites = sites;
+
   // Calculate statistics
-  const totalSites = sites.length;
-  const successfulSites = sites.filter(s => s.status === 'success').length;
-  const buildingSites = sites.filter(s => s.status === 'building').length;
-  const failedSites = sites.filter(s => s.status === 'failed').length;
+  const totalSites = displaySites.length;
+  const successfulSites = displaySites.filter(s => s.status === 'success').length;
+  const buildingSites = displaySites.filter(s => s.status === 'building').length;
+  const failedSites = displaySites.filter(s => s.status === 'failed').length;
+
+  const profileInitials = profileUser?.username
+    ? profileUser.username
+        .split(/\s+/)
+        .map(part => part[0])
+        .slice(0, 2)
+        .join('')
+        .toLowerCase()
+    : 'me';
 
   return (
-    <div className="min-h-screen bg-[#D8DAD3] py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Profile Header */}
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-6">
-              {user.avatar_url && (
-                <Image
-                  src={user.avatar_url}
-                  alt={user.username}
-                  width={100}
-                  height={100}
-                  className="rounded-full border-4 border-[#566246]"
-                />
-              )}
-              <div>
-                <h1 className="text-3xl font-bold text-[#566246] mb-2">
-                  {user.username}
-                </h1>
-                {user.email && (
-                  <p className="text-gray-600 mb-1">{user.email}</p>
-                )}
-                <p className="text-sm text-gray-500">
-                  Member since {new Date(user.created_at).toLocaleDateString()}
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
-            >
-              Logout
-            </button>
+    <div className="min-h-screen bg-gradient-to-b from-[#566246] via-[#d9d9d2] to-[#566246]">
+      <div className="max-w-5xl mx-auto px-6 py-12">
+        <div className="flex items-center justify-end mb-6 gap-3">
+          <div className="w-9 h-9 rounded-full bg-white/80 flex items-center justify-center text-[#566246] text-sm font-semibold">
+            {profileInitials}
+          </div>
+          <span className="text-white text-sm font-medium">{profileUser.username}</span>
+          <button
+            onClick={handleLogout}
+            className="px-3 py-1 rounded-full bg-red-500 text-white text-xs hover:bg-red-600 transition"
+          >
+            Logout
+          </button>
+        </div>
+
+        <div className="text-center mb-10">
+          <div className="mx-auto w-28 h-28 rounded-full bg-white/80 shadow-lg flex items-center justify-center text-3xl font-semibold text-[#566246]">
+            {profileInitials}
+          </div>
+          <h1 className="mt-4 text-xl font-semibold text-[#3f3f3f]">{profileUser.username}</h1>
+          <p className="text-xs text-gray-600">
+            Member since {new Date(profileUser.created_at).toLocaleDateString()}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+          <div className="bg-white rounded-2xl shadow px-5 py-6 text-center">
+            <div className="text-2xl font-bold text-[#3f3f3f]">1</div>
+            <div className="text-xs text-gray-500 mt-1">Total Views</div>
+          </div>
+          <div className="bg-white rounded-2xl shadow px-5 py-6 text-center">
+            <div className="text-2xl font-bold text-[#3f3f3f]">0</div>
+            <div className="text-xs text-gray-500 mt-1">Total Likes</div>
+          </div>
+          <div className="bg-white rounded-2xl shadow px-5 py-6 text-center">
+            <div className="text-2xl font-bold text-[#3f3f3f]">220</div>
+            <div className="text-xs text-gray-500 mt-1">Trending Rank</div>
+          </div>
+          <div className="bg-white rounded-2xl shadow px-5 py-6 text-center">
+            <div className="text-2xl font-bold text-[#3f3f3f]">0</div>
+            <div className="text-xs text-gray-500 mt-1">Projects</div>
           </div>
         </div>
 
-        {/* Statistics Section - Only show if user has portfolios */}
-        {!loadingSites && totalSites > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-lg shadow p-6 text-center">
-              <div className="text-3xl font-bold text-[#566246] mb-2">{totalSites}</div>
-              <div className="text-sm text-gray-600">Total Portfolios</div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6 text-center">
-              <div className="text-3xl font-bold text-green-600 mb-2">{successfulSites}</div>
-              <div className="text-sm text-gray-600">Live Sites</div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6 text-center">
-              <div className="text-3xl font-bold text-yellow-600 mb-2">{buildingSites}</div>
-              <div className="text-sm text-gray-600">Building</div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6 text-center">
-              <div className="text-3xl font-bold text-red-600 mb-2">{failedSites}</div>
-              <div className="text-sm text-gray-600">Failed</div>
-            </div>
-          </div>
-        )}
-
-        {/* Sites Section */}
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-[#566246]">
-              {totalSites > 0 ? 'Your Portfolios' : 'Get Started with Your Free Portfolio'}
-            </h2>
+        <div className="bg-white/90 rounded-3xl shadow-xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-[#3f3f3f]">Your Portfolios</h2>
             {totalSites === 0 && (
               <button
                 onClick={() => router.push('/form')}
-                className="px-4 py-2 bg-[#566246] text-white rounded hover:bg-[#4A4A48] transition"
+                className="px-4 py-2 bg-[#566246] text-white rounded-full text-sm hover:opacity-90 transition"
               >
                 Create New Portfolio
               </button>
             )}
           </div>
-          {totalSites > 0 && (
-            <p className="text-sm text-gray-500 mb-4">
-              Only one portfolio is allowed per account.
-            </p>
-          )}
 
           {loadingSites ? (
             <div className="flex justify-center py-8">
               <div className="animate-spin w-8 h-8 border-4 border-[#566246] border-t-transparent rounded-full"></div>
             </div>
-          ) : sites.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="mb-6">
-                <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-[#566246] bg-opacity-10 mb-4">
-                  <svg className="w-10 h-10 text-[#566246]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-bold text-[#566246] mb-3">
-                  🎉 Host Your Portfolio for FREE!
-                </h3>
-                <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-                  Showcase your work to the world with a custom subdomain on knowabt.me. 
-                  It's completely free, fast to deploy, and perfect for developers, designers, and creators!
-                </p>
-                <div className="grid md:grid-cols-3 gap-4 mb-8 text-left max-w-3xl mx-auto">
-                  <div className="bg-[#D8DAD3] bg-opacity-50 rounded-lg p-4">
-                    <div className="text-2xl mb-2">⚡</div>
-                    <h4 className="font-semibold text-[#566246] mb-1">Lightning Fast</h4>
-                    <p className="text-sm text-gray-600">Deploy in minutes with automatic builds from your Git repository</p>
-                  </div>
-                  <div className="bg-[#D8DAD3] bg-opacity-50 rounded-lg p-4">
-                    <div className="text-2xl mb-2">🌐</div>
-                    <h4 className="font-semibold text-[#566246] mb-1">Custom Subdomain</h4>
-                    <p className="text-sm text-gray-600">Get your own yourname.knowabt.me subdomain instantly</p>
-                  </div>
-                  <div className="bg-[#D8DAD3] bg-opacity-50 rounded-lg p-4">
-                    <div className="text-2xl mb-2">🎨</div>
-                    <h4 className="font-semibold text-[#566246] mb-1">Showcase Skills</h4>
-                    <p className="text-sm text-gray-600">Highlight your top skills and get discovered by others</p>
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={() => router.push('/form')}
-                className="px-8 py-4 bg-[#566246] text-white rounded-lg hover:bg-[#4A4A48] transition font-semibold text-lg shadow-lg hover:shadow-xl"
-              >
-                🚀 Create Your Free Portfolio Now
-              </button>
-              <p className="mt-4 text-sm text-gray-500">
-                No credit card required • Deploy in 5 minutes • 100% Free
-              </p>
-            </div>
           ) : (
             <div className="grid gap-4">
-              {sites.map((site) => (
-                <div
-                  key={site.id}
-                  className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-xl font-semibold text-[#566246]">
-                          {site.name}.knowabt.me
-                        </h3>
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            site.status === 'success'
-                              ? 'bg-green-100 text-green-800'
-                              : site.status === 'building'
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : 'bg-red-100 text-red-800'
-                          }`}
-                        >
-                          {site.status}
-                        </span>
-                      </div>
-                      {site.url && (
-                        <a
-                          href={site.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline mb-2 inline-block"
-                        >
-                          {site.url}
-                        </a>
-                      )}
-                      {site.skills && (
-                        <div className="mt-2">
-                          <span className="text-sm text-gray-600">Skills: </span>
-                          <span className="text-sm text-[#566246] font-medium">
-                            {site.skills}
+              {displaySites.map((site) => {
+                const skillTags = (site.skills || '')
+                  .split(',')
+                  .map(skill => skill.trim())
+                  .filter(Boolean)
+                  .slice(0, 3);
+                return (
+                  <div
+                    key={site.id}
+                    className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <div className="flex items-center gap-3">
+                          <h3 className="text-base font-semibold text-[#3f3f3f]">
+                            {site.name}.knowabt.me
+                          </h3>
+                          <span className="text-xs px-3 py-1 rounded-full bg-[#566246] text-white">
+                            {site.status}
                           </span>
                         </div>
-                      )}
-                      <p className="text-xs text-gray-500 mt-2">
-                        Created {new Date(site.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                    {site.status === 'success' && (
-                      <div className="ml-4 flex flex-col gap-2 items-end">
-                        <a
-                          href={`https://${site.name}.knowabt.me`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-4 py-2 bg-[#566246] text-white rounded hover:bg-[#4A4A48] transition"
-                        >
-                          Visit Site
-                        </a>
-                        <button
-                          onClick={() => handleRebuild(site.name)}
-                          disabled={!!actionLoading[site.name]}
-                          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:opacity-50"
-                        >
-                          {actionLoading[site.name] ? 'Rebuilding...' : 'Rebuild'}
-                        </button>
-                        <button
-                          onClick={() => handleDeleteRequest(site.name)}
-                          disabled={!!actionLoading[site.name]}
-                          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition disabled:opacity-50"
-                        >
-                          Request Delete
-                        </button>
+                        <div className="mt-2 text-sm">
+                          <a
+                            href={site.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline"
+                          >
+                            {site.url}
+                          </a>
+                        </div>
+                        <div className="mt-3 text-xs text-gray-500">Skills: Portfolios</div>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {skillTags.map((skill) => (
+                            <span
+                              key={skill}
+                              className="px-3 py-1 rounded-full text-xs bg-[#566246] text-white"
+                            >
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+                        <div className="mt-4 text-xs text-gray-500">Skills Portfolios</div>
+                        <div className="mt-2 flex items-center gap-2 text-xs text-gray-600">
+                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#566246] text-white">♥</span>
+                          Like / 7
+                        </div>
                       </div>
-                    )}
+                      {site.status === 'success' && (
+                        <div className="flex flex-col gap-2 items-end">
+                          <a
+                            href={`https://${site.name}.knowabt.me`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-4 py-2 rounded-full bg-[#566246] text-white text-sm"
+                          >
+                            Visit Site
+                          </a>
+                          <button
+                            onClick={() => handleRebuild(site.name)}
+                            disabled={!!actionLoading[site.name]}
+                            className="px-4 py-2 rounded-full bg-[#4A4A48] text-white text-sm disabled:opacity-50"
+                          >
+                            {actionLoading[site.name] ? 'Rebuilding...' : 'Rebuild'}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteRequest(site.name)}
+                            disabled={!!actionLoading[site.name]}
+                            className="px-4 py-2 rounded-full bg-red-500 text-white text-sm disabled:opacity-50"
+                          >
+                            Request Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

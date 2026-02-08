@@ -44,7 +44,7 @@ export default function LoginPage() {
     return (
         <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#D8DAD3' }}>
             {/* Header */}
-            <header className="px-8 py-6">
+            {/* <header className="px-8 py-6">
                 <div className="flex items-center gap-3">
                     <Image
                         src="/Remove-background-project-cropped.svg"
@@ -58,7 +58,7 @@ export default function LoginPage() {
                         <span className="font-bold">.me</span>
                     </h1>
                 </div>
-            </header>
+            </header> */}
 
             {/* Main Content */}
             <main className="flex-1 flex items-center justify-center px-4">
