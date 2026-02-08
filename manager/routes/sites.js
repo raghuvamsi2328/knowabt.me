@@ -9,6 +9,12 @@ const { crawlPortfolio, buildSearchText } = require('../utils/crawler');
 const { submitPortfolioToIndexNow } = require('../utils/indexnow');
 const { sendDeploymentSuccessEmail, sendDeleteRequestEmail, sendDeploymentFailedEmail } = require('../utils/mailer');
 const { validateDeploymentRequest, checkRateLimit } = require('../utils/security');
+const crypto = require('crypto');
+
+const ONE_BY_ONE_PNG = Buffer.from(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=',
+    'base64'
+);
 
 // Queue build function
 const queueBuild = ({ name, repoUrl, contact, skills, userId }, res) => {
@@ -43,6 +49,7 @@ const queueBuild = ({ name, repoUrl, contact, skills, userId }, res) => {
             
             // Security-hardened Docker command
             // Note: Network access is required to clone from GitHub, but we limit it with firewall rules
+                const viewBaseUrl = process.env.PUBLIC_BASE_URL || process.env.VIEW_BASE_URL || 'http://localhost:3000';
                 const dockerCmd = `docker run --rm \
                     --user 0:0 \
                 --read-only \
@@ -54,6 +61,8 @@ const queueBuild = ({ name, repoUrl, contact, skills, userId }, res) => {
                 --cpus="1.0" \
                 --security-opt=no-new-privileges \
                 --cap-drop=ALL \
+                    -e SITE_NAME=${name} \
+                    -e VIEW_BASE_URL=${viewBaseUrl} \
                 -v ${outputVolume}:/output:rw \
                 ${builderImage} ${repoUrl}`;
             
@@ -180,6 +189,42 @@ const queueBuild = ({ name, repoUrl, contact, skills, userId }, res) => {
     }
 };
 
+// View tracking pixel (unique per IP+UA per day)
+router.get('/:name/view.png', (req, res) => {
+    const name = (req.params.name || '').toString().trim();
+    if (!name || !slugPattern.test(name)) {
+        res.set('Content-Type', 'image/png');
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        return res.status(200).send(ONE_BY_ONE_PNG);
+    }
+
+    db.get('SELECT id FROM sites WHERE name = ? AND status = ? LIMIT 1', [name, 'success'], (err, site) => {
+        if (!err && site) {
+            const ip = (req.ip || '').toString();
+            const ua = (req.get('user-agent') || '').toString();
+            const viewerHash = crypto
+                .createHash('sha256')
+                .update(`${ip}|${ua}`)
+                .digest('hex');
+            const viewDate = new Date().toISOString().slice(0, 10);
+
+            db.run(
+                'INSERT OR IGNORE INTO site_views (site_id, viewer_hash, view_date) VALUES (?, ?, ?)',
+                [site.id, viewerHash, viewDate],
+                function (insertErr) {
+                    if (!insertErr && this.changes > 0) {
+                        db.run('UPDATE sites SET views_count = COALESCE(views_count, 0) + 1 WHERE id = ?', [site.id]);
+                    }
+                }
+            );
+        }
+
+        res.set('Content-Type', 'image/png');
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        return res.status(200).send(ONE_BY_ONE_PNG);
+    });
+});
+
 // List all deployments (filtered by user if authenticated)
 router.get('/deployments', (req, res) => {
     // If user is authenticated, return only their sites
@@ -234,6 +279,7 @@ router.post('/:name/rebuild', (req, res) => {
         const skills = site.skills;
         const contact = site.contact;
 
+            const viewBaseUrl = process.env.PUBLIC_BASE_URL || process.env.VIEW_BASE_URL || 'http://localhost:3000';
             const dockerCmd = `docker run --rm \
                 --user 0:0 \
             --read-only \
@@ -245,6 +291,8 @@ router.post('/:name/rebuild', (req, res) => {
             --cpus="1.0" \
             --security-opt=no-new-privileges \
             --cap-drop=ALL \
+                -e SITE_NAME=${name} \
+                -e VIEW_BASE_URL=${viewBaseUrl} \
             -v ${outputVolume}:/output:rw \
             ${builderImage} ${repoUrl}`;
 
@@ -434,7 +482,7 @@ router.get('/', (req, res) => {
 // Fetch top repos from database
 router.get('/top-repos', (req, res) => {
     db.all(
-        'SELECT name, url, skills, created_at, status FROM sites WHERE status = ? ORDER BY created_at DESC LIMIT 10',
+        'SELECT name, url, skills, created_at, status, views_count FROM sites WHERE status = ? ORDER BY created_at DESC LIMIT 10',
         ['success'],
         (err, rows) => {
             if (err) return res.status(500).json({ error: err.message });
@@ -443,7 +491,8 @@ router.get('/top-repos', (req, res) => {
                 url: row.url,
                 skills: normalizeSkills(row.skills),
                 created_at: row.created_at,
-                status: row.status
+                status: row.status,
+                views_count: row.views_count || 0
             }));
             res.json({ repos });
         }

@@ -19,10 +19,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Transform backend data to frontend portfolio format
     const portfolios = (data.repos || []).map((repo: any) => ({
       name: repo.name,
-      tech: Array.isArray(repo.skills) ? repo.skills.join(', ') : (repo.skills || 'N/A'),
+      skills: Array.isArray(repo.skills)
+        ? repo.skills
+        : typeof repo.skills === 'string'
+          ? repo.skills.split(',').map((skill: string) => skill.trim()).filter(Boolean)
+          : [],
       subdomain: repo.name,
       repoUrl: repo.url,
       createdAt: repo.created_at,
+      viewsCount: repo.views_count || 0,
     }));
 
     return res.status(200).json({ portfolios });

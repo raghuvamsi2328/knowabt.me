@@ -12,6 +12,7 @@ interface Site {
   status: string;
   created_at: string;
   skills?: string;
+  views_count?: number;
 }
 
 export default function ProfilePage() {
@@ -131,6 +132,7 @@ export default function ProfilePage() {
   const successfulSites = displaySites.filter(s => s.status === 'success').length;
   const buildingSites = displaySites.filter(s => s.status === 'building').length;
   const failedSites = displaySites.filter(s => s.status === 'failed').length;
+  const totalViews = displaySites.reduce((sum, site) => sum + (site.views_count || 0), 0);
 
   const profileInitials = profileUser?.username
     ? profileUser.username
@@ -169,12 +171,12 @@ export default function ProfilePage() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
           <div className="bg-white rounded-2xl shadow px-5 py-6 text-center">
-            <div className="text-2xl font-bold text-[#3f3f3f]">1</div>
+            <div className="text-2xl font-bold text-[#3f3f3f]">{totalViews}</div>
             <div className="text-xs text-gray-500 mt-1">Total Views</div>
           </div>
           <div className="bg-white rounded-2xl shadow px-5 py-6 text-center">
-            <div className="text-2xl font-bold text-[#3f3f3f]">0</div>
-            <div className="text-xs text-gray-500 mt-1">Total Likes</div>
+            <div className="text-2xl font-bold text-[#3f3f3f]">—</div>
+            <div className="text-xs text-gray-500 mt-1">Likes (Coming Soon)</div>
           </div>
           <div className="bg-white rounded-2xl shadow px-5 py-6 text-center">
             <div className="text-2xl font-bold text-[#3f3f3f]">220</div>
@@ -248,9 +250,10 @@ export default function ProfilePage() {
                           ))}
                         </div>
                         <div className="mt-4 text-xs text-gray-500">Skills Portfolios</div>
-                        <div className="mt-2 flex items-center gap-2 text-xs text-gray-600">
-                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#566246] text-white">♥</span>
-                          Like / 7
+                        <div className="mt-2 flex items-center gap-3 text-xs text-gray-600">
+                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#566246] text-white">👁</span>
+                          <span>{site.views_count || 0} Views</span>
+                          <span className="text-gray-400">• Likes coming soon</span>
                         </div>
                       </div>
                       {site.status === 'success' && (

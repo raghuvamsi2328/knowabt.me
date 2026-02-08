@@ -26,6 +26,16 @@ db.serialize(() => {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
 
+    // Create site_views table for unique view tracking
+    db.run(`CREATE TABLE IF NOT EXISTS site_views (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        site_id INTEGER NOT NULL,
+        viewer_hash TEXT NOT NULL,
+        view_date TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(site_id, viewer_hash, view_date)
+    )`);
+
     // Add missing columns to sites table if needed
     db.all('PRAGMA table_info(sites)', (err, columns) => {
         if (err) {

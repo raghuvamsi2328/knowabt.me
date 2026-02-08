@@ -5,9 +5,11 @@ import { COLORS } from "../config";
 
 type Portfolio = {
   name: string;
-  tech: string;
+  skills: string[];
   subdomain: string;
   repoUrl: string;
+  createdAt?: string;
+  viewsCount?: number;
 };
 
 // Mock data as default
@@ -15,21 +17,27 @@ type Portfolio = {
 const MOCK_PORTFOLIOS: Portfolio[] = [
   {
     name: "Project-X",
-    tech: "React",
+    skills: ["React"],
     subdomain: "project-x",
     repoUrl: "https://github.com/example/project-x",
+    createdAt: new Date().toISOString(),
+    viewsCount: 0,
   },
   {
     name: "Project-Y",
-    tech: "HTML",
+    skills: ["HTML", "CSS"],
     subdomain: "project-y",
     repoUrl: "https://github.com/example/project-y",
+    createdAt: new Date().toISOString(),
+    viewsCount: 0,
   },
   {
     name: "Project-Latisanu",
-    tech: "JavaScript",
+    skills: ["JavaScript", "TypeScript", "Node.js"],
     subdomain: "project-latisanu",
     repoUrl: "https://github.com/example/project-latisanu",
+    createdAt: new Date().toISOString(),
+    viewsCount: 0,
   },
 ];
 export default function TopReposSection() {
@@ -80,33 +88,58 @@ export default function TopReposSection() {
                   style={{
                     background: COLORS.card,
                     border: `2px solid ${COLORS.accent}`,
-                    width: "320px",
+                    width: "360px",
                     textDecoration: "none",
                   }}
                 >
                   <h3
-                    className="font-bold text-xl mb-4"
+                    className="font-bold text-xl mb-2"
                     style={{ color: COLORS.textDark }}
                   >
                     {portfolio.name}
                   </h3>
+                  <div className="flex items-center gap-3 text-xs mb-4" style={{ color: COLORS.accent }}>
+                    <span>Views: {portfolio.viewsCount || 0}</span>
+                    {portfolio.createdAt && (
+                      <span>
+                        Deployed{" "}
+                        {new Date(portfolio.createdAt).toLocaleDateString(undefined, {
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {(portfolio.skills || []).slice(0, 3).map((skill) => (
+                      <span
+                        key={skill}
+                        className="px-3 py-1 rounded-full text-xs font-medium"
+                        style={{ background: COLORS.secondary, color: COLORS.white }}
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                    {portfolio.skills && portfolio.skills.length > 3 && (
+                      <span
+                        className="px-3 py-1 rounded-full text-xs font-medium"
+                        style={{ background: COLORS.accent, color: COLORS.white }}
+                      >
+                        +{portfolio.skills.length - 3} more
+                      </span>
+                    )}
+                  </div>
                   <div className="flex items-center justify-between">
-                    <span
-                      className="px-3 py-1 rounded-full text-sm font-medium"
-                      style={{
-                        background: COLORS.secondary,
-                        color: COLORS.white,
-                      }}
-                    >
-                      {portfolio.tech}
+                    <span className="text-sm" style={{ color: COLORS.textDark }}>
+                      {portfolio.subdomain}.knowabt.me
                     </span>
                     <a
                       href={portfolio.repoUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="text-sm hover:underline"
-                      style={{ color: COLORS.secondary }}
+                      className="text-sm px-3 py-1 rounded-full font-semibold shadow hover:opacity-90 transition"
+                      style={{ background: COLORS.secondary, color: COLORS.white }}
                     >
                       View Repo →
                     </a>

@@ -11,6 +11,7 @@ services:
     environment:
       - NODE_ENV=production
       - BUILDER_IMAGE=portfolio-builder
+      - VIEW_BASE_URL=https://knowabt.me
     env_file:
       - ./manager/.env
     networks:

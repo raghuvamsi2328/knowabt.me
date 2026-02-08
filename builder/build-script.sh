@@ -7,6 +7,8 @@ export HOME="/tmp"
 
 REPO_URL=$1
 OUTPUT_PATH=${2:-/output}
+SITE_NAME=${SITE_NAME:-}
+VIEW_BASE_URL=${VIEW_BASE_URL:-https://knowabt.me}
 
 # Security: Validate repository URL
 if [[ ! "$REPO_URL" =~ ^https://github\.com/ ]]; then
@@ -75,5 +77,17 @@ else
     else
         cp -r ./* "$OUTPUT_PATH/"
     fi
+fi
+
+if [ -n "$SITE_NAME" ]; then
+    echo "🔎 Injecting view tracker for $SITE_NAME..."
+    VIEW_SNIPPET="<script>(function(){try{var i=new Image();i.referrerPolicy='no-referrer-when-downgrade';i.src='${VIEW_BASE_URL}/sites/${SITE_NAME}/view.png?ts='+Date.now();}catch(e){}})();</script>"
+    find "$OUTPUT_PATH" -type f -name "*.html" -print0 | while IFS= read -r -d '' file; do
+        if grep -q "</body>" "$file"; then
+            sed -i "s|</body>|${VIEW_SNIPPET}</body>|" "$file"
+        else
+            printf "\n%s\n" "$VIEW_SNIPPET" >> "$file"
+        fi
+    done
 fi
 

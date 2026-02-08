@@ -64,6 +64,7 @@ const requiredColumns = {
     contact: 'TEXT',
     skills: 'TEXT',
     user_id: 'INTEGER',
+    views_count: 'INTEGER DEFAULT 0',
     // Metadata fields from crawled portfolio
     metadata_title: 'TEXT',
     metadata_description: 'TEXT',
